@@ -1,7 +1,42 @@
+import path from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import Icons from 'unplugin-icons/vite'
+import IconsResolver from 'unplugin-icons/resolver'
 
-// https://vitejs.dev/config/
+const pathSrc = path.resolve(__dirname, 'src')
+
 export default defineConfig({
-  plugins: [vue()]
+  resolve: {
+    alias: {
+      '@': pathSrc,
+    },
+  },
+  plugins: [
+    vue(),
+    AutoImport({
+      imports: ['vue'],
+      resolvers: [
+        ElementPlusResolver(),
+        IconsResolver({
+          prefix: 'Icon',
+        }),
+      ],
+    }),
+    Components({
+      resolvers: [
+        ElementPlusResolver(),
+        IconsResolver({
+          prefix: false, // 图标前缀，默认为 i
+          enabledCollections: ['ep'], // 代表 element-plus
+        }),
+      ],
+    }),
+    Icons({
+      autoInstall: true,
+    }),
+  ],
 })

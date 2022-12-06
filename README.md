@@ -1,7 +1,23 @@
-# Vue 3 + Vite
+WebChat 聊天室
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+开发中。。。
 
-## Recommended IDE Setup
+## 功能介绍
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
+[]支持注册/登录
+
+[]支持用户信息设置
+
+[]支持添加好友
+
+[]支持搜索好友
+
+[]支持文字聊天
+
+[]支持表情聊天
+
+[]支持消息显示设置
+
+[]支持历史聊天记录
+
+[]支持拉群聊天

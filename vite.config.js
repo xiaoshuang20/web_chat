@@ -39,4 +39,12 @@ export default defineConfig({
       autoInstall: true,
     }),
   ],
+  server: {
+    proxy: {
+      '/socket.io': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+      },
+    },
+  },
 })

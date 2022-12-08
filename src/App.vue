@@ -1,25 +1,19 @@
 <template>
-  <button @click="sendMsgToServer">发送消息给服务端</button>
+  <div class="web_chat">
+    <ChatApp />
+  </div>
 </template>
 
 <script setup>
-import { io } from 'socket.io-client'
-const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
-
-onMounted(() => {
-  initConnect()
-})
-
-const initConnect = () => {
-  socket.on('pushMsg', (data) => {
-    console.log(data)
-  })
-}
-
-const sendMsgToServer = () => {
-  console.log('click')
-  socket.emit('sendMsg', 'xiaoshuang')
-}
+import ChatApp from './components/ChatApp.vue'
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.web_chat {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  background: url('./assets/images/bgc.jpg') no-repeat center;
+  background-size: cover;
+}
+</style>

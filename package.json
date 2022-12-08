@@ -12,7 +12,8 @@
     "element-plus": "^2.2.26",
     "express": "^4.18.2",
     "socket.io-client": "4.4.0",
-    "vue": "^3.2.41"
+    "vue": "^3.2.41",
+    "vue-router": "^4.1.6"
   },
   "devDependencies": {
     "@iconify-json/ep": "^1.1.8",

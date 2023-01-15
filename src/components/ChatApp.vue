@@ -50,7 +50,7 @@
             </div>
           </li>
         </ul>
-        <div class="footer">进阶功能（待定）</div>
+        <div class="footer">进阶功能（我的/气泡样式）</div>
       </div>
       <BackgroundPanel />
     </div>

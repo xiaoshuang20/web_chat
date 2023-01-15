@@ -12,8 +12,8 @@ const pathSrc = path.resolve(__dirname, 'src')
 export default defineConfig({
   resolve: {
     alias: {
-      '@': pathSrc,
-    },
+      '@': pathSrc
+    }
   },
   plugins: [
     vue(),
@@ -22,29 +22,34 @@ export default defineConfig({
       resolvers: [
         ElementPlusResolver(),
         IconsResolver({
-          prefix: 'Icon',
-        }),
-      ],
+          prefix: 'Icon'
+        })
+      ]
     }),
     Components({
       resolvers: [
         ElementPlusResolver(),
         IconsResolver({
           prefix: false, // 图标前缀，默认为 i
-          enabledCollections: ['ep'], // 代表 element-plus
-        }),
-      ],
+          enabledCollections: ['ep'] // 代表 element-plus
+        })
+      ]
     }),
     Icons({
-      autoInstall: true,
-    }),
+      autoInstall: true
+    })
   ],
   server: {
     proxy: {
-      '/socket.io': {
+      '/api': {
         target: 'http://127.0.0.1:3000',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/\/api/, '')
       },
-    },
-  },
+      '/socket.io': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true
+      }
+    }
+  }
 })

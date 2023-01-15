@@ -31,7 +31,7 @@
         <ul>
           <li
             v-for="(user, index) in users"
-            :key="user.id"
+            :key="user.objectId"
             @click="changeCurrent(index)"
             :class="{ active: current === index }"
           >
@@ -39,11 +39,11 @@
               <el-avatar :size="40" :src="circleUrl" />
             </div>
             <div class="center">
-              <span>test</span>
+              <span>{{ user.name }}</span>
               <p>hello，这是一段测试信息，测试多余文字溢出</p>
             </div>
             <div class="right">
-              <span>18:49</span>
+              <span>{{ user.updatedAt.slice(11, 16) }}</span>
               <div class="msg_unread">
                 <p>1</p>
               </div>
@@ -61,29 +61,36 @@
 import circleUrl from '@/assets/images/avatar.jpg'
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
+import UserService from '@/api/user.js'
+
+onBeforeMount(() => {
+  // console.log('xiao')
+  getAllFriend()
+})
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
-const test = ref('')
-const users = ref([
-  {
-    id: 1
-  },
-  { id: 2 }
-])
-
-let current = ref(0)
-const changeCurrent = (index) => {
-  current.value = index
-}
-
 onMounted(() => {
-  initConnect()
+  // initConnect()
 })
 
 const initConnect = () => {
   socket.on('pushMsg', (data) => {
     console.log(data)
   })
+}
+const test = ref('')
+
+/**
+ * > 用户区域
+ */
+let current = ref(0) // 当前选中用户
+const changeCurrent = (index) => {
+  current.value = index
+}
+const users = ref([])
+const getAllFriend = async () => {
+  let res = await UserService.getAllFriends({ id: 'irJ2AAAU' })
+  users.value = res.data
 }
 
 const sendMsgToServer = () => {

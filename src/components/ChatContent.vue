@@ -56,7 +56,7 @@ let props = defineProps(['isSend'])
     height: 8px;
     right: -7px;
     top: 10px;
-    background-color: #cedee0;
+    background-color: #12b7f5;
     clip-path: polygon(100% 0, 0 100%, 0 20%);
   }
 }

@@ -50,7 +50,9 @@
             </div>
           </li>
         </ul>
-        <div class="footer">进阶功能（我的/气泡样式/历史记录/创建房间）</div>
+        <div class="footer">
+          进阶功能（我的/好友请求/气泡样式/历史记录/创建房间）
+        </div>
       </div>
       <BackgroundPanel />
     </div>

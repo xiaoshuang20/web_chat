@@ -12,4 +12,7 @@ export default (app) => {
       res.send(reply.results)
     })
   })
+  // 添加好友（双向添加）
+
+  //
 }

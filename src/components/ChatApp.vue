@@ -40,7 +40,7 @@
             </div>
             <div class="center">
               <span>{{ user.name }}</span>
-              <p>hello，这是一段测试信息，测试多余文字溢出</p>
+              <p>hello, 这是一段测试信息，测试多余文字溢出</p>
             </div>
             <div class="right">
               <span>{{ user.updatedAt.slice(11, 16) }}</span>

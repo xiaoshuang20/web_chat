@@ -28,7 +28,7 @@ const drag = {
         // 因为浏览器里并不能直接取到并且使用clientX、clientY,所以使用事件委托在内部做完赋值
         const l = e.clientX - disX
         const t = e.clientY - disY
-        // 计算移动当前元素的位置，并且给该元素样式中的left和top值赋值
+        // 计算移动当前元素的位置，并且给该元素样式中的 left和 top值赋值
         target.style.left = (l < minTop ? minTop : l > 475 ? 475 : l) + 'px'
         target.style.top = (t < minTop ? minTop : t) + 'px'
       }

@@ -1,6 +1,65 @@
 import Bmob from 'hydrogen-js-sdk'
 
-const queryUsersMessage = Bmob.Query('user_message')
+// 测试
+Bmob.initialize('bc82f997576ffeca', 'xiao')
+
+// 需要参数：双方用户的 name 值
+
+// 创建聊天室（存储聊天记录）
+// const pointer = Bmob.Pointer('users')
+// const poiID = pointer.set('ilUEJJJK')
+// const queryUsersMessage = Bmob.Query('user_message')
+
+// queryUsersMessage.set('users', 'test-xiao')
+// queryUsersMessage
+//   .save()
+//   .then((res) => {
+//     console.log(res)
+//   })
+//   .catch((err) => {
+//     console.log(err)
+//   })
+
+// 发送信息
+// let message = {
+//   from: {
+//     name: 'xiao',
+//     avatarUrl: '',
+//     type: 'user',
+//     id: 'irJ2AAAU'
+//   },
+//   to: {
+//     name: 'test',
+//     avatarUrl: '',
+//     type: 'user',
+//     id: 'ilUEJJJK'
+//   },
+//   content: '你好, 小, 我是test',
+//   type: 'text',
+//   _id: '1'
+
+// const queryUsersMessage = Bmob.Query('user_message')
+// queryUsersMessage.equalTo('users', '==', 'xiao-test')
+// queryUsersMessage
+//   .find()
+//   .then((res) => {
+//     console.log(res)
+//     queryUsersMessage.get(res[0].objectId).then((res) => {
+//       console.log(res)
+//       res.add('message', [message])
+//       res.save()
+//     })
+//   })
+//   .catch((err) => {
+//     console.log(err)
+//   })
+
+// 获取聊天信息
+// const queryUsersMessage = Bmob.Query('user_message')
+// queryUsersMessage.equalTo('users', '==', 'xiao-test')
+// queryUsersMessage.find().then((res) => {
+//   console.log(res[0].message)
+// })
 
 export default (app) => {
   // 获取好友列表
@@ -12,30 +71,4 @@ export default (app) => {
       res.send(reply.results)
     })
   })
-  // 添加好友（双向添加）
-
-  //
-}
-
-let message = {
-  from: {
-    name: 'shuang',
-    avatarUrl: 'static/img/avatar/20180414165909.jpg',
-    ip: '127.0.0.1',
-    deviceType: 'pc',
-    roomId: 'OEZR3AgBg8mAcghgAAAF',
-    type: 'user',
-    id: 'OEZR3AgBg8mAcghgAAAF',
-    time: 1670316090094
-  },
-  to: {
-    id: 'group_001',
-    name: '群聊天室',
-    avatarUrl: 'static/img/avatar/group-icon.png',
-    type: 'group'
-  },
-  content: '3',
-  type: 'text',
-  time: 1670316123494,
-  _id: '3lUhGENLpyR5QpkS'
 }

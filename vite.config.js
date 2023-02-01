@@ -25,6 +25,7 @@ export default defineConfig({
           prefix: 'Icon'
         })
       ]
+      // dts: path.resolve(pathSrc, 'auto-imports.d.ts')
     }),
     Components({
       resolvers: [
@@ -34,6 +35,7 @@ export default defineConfig({
           enabledCollections: ['ep'] // 代表 element-plus
         })
       ]
+      // dts: path.resolve(pathSrc, 'components.d.ts')
     }),
     Icons({
       autoInstall: true

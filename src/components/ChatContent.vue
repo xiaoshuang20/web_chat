@@ -5,12 +5,12 @@
       c_send: props.isSend
     }"
   >
-    <span>开心！</span>
+    <span>{{ props.msg }}</span>
   </div>
 </template>
 
 <script setup>
-let props = defineProps(['isSend'])
+let props = defineProps(['isSend', 'msg'])
 </script>
 
 <style scoped lang="less">

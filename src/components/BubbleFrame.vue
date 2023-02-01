@@ -11,7 +11,7 @@
     <div class="chat-bubble-msg">
       <div class="chat-bubble-time"></div>
       <div class="chat-bubble-text">
-        <ChatContent :isSend="props.isSend" />
+        <ChatContent :isSend="props.isSend" :msg="props.content" />
       </div>
     </div>
     <div class="chat-bubble-avatar" v-if="props.isSend">
@@ -24,7 +24,7 @@
 import circleUrl from '@/assets/images/avatar.jpg'
 import ChatContent from './ChatContent.vue'
 
-let props = defineProps(['isSend'])
+let props = defineProps(['isSend', 'content'])
 </script>
 
 <style scoped lang="less">

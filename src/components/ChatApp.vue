@@ -54,7 +54,7 @@
           进阶功能（我的/好友请求/气泡样式/历史记录/创建房间）
         </div>
       </div>
-      <BackgroundPanel />
+      <BackgroundPanel :message="message" />
     </div>
   </div>
 </template>
@@ -65,22 +65,18 @@ import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
 import UserService from '@/api/user.js'
 
-onBeforeMount(() => {
-  // console.log('xiao')
-  getAllFriend()
-})
-
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
 onMounted(() => {
-  // initConnect()
+  initConnect()
 })
 
-const initConnect = () => {
-  socket.on('pushMsg', (data) => {
-    console.log(data)
-  })
+const initConnect = async () => {
+  await getAllFriend()
+  getHistoryMessage()
 }
 const test = ref('')
+let currentUser = ref('xiao')
+let targetUser = ref('')
 
 /**
  * > 用户区域
@@ -93,11 +89,22 @@ const users = ref([])
 const getAllFriend = async () => {
   let res = await UserService.getAllFriends({ id: 'irJ2AAAU' })
   users.value = res.data
+  targetUser.value = res.data[0].name
 }
 
-const sendMsgToServer = () => {
-  console.log('click')
-  socket.emit('sendMsg', 'xiaoshuang')
+/**
+ * > 消息区域
+ */
+let message = ref([])
+const getHistoryMessage = () => {
+  socket.emit(
+    'searchHistoryMessage',
+    `${currentUser.value}-${targetUser.value}`
+  )
+  socket.on('getHistoryMessage', (res) => {
+    message.value = res
+    console.log(res)
+  })
 }
 </script>
 

@@ -3,5 +3,5 @@ import message from './message.js'
 
 export default (app) => {
   user(app)
-  message(app)
+  // message(app)
 }

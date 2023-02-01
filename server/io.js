@@ -1,17 +1,18 @@
 import { Server } from 'socket.io'
+import api from './store.js'
 
 const io = new Server({
   cors: {
-    origin: '*',
-  },
+    origin: '*'
+  }
 })
 
 io.sockets.on('connection', (socket) => {
   console.log('user connected')
 
-  socket.on('sendMsg', (data) => {
-    console.log(data)
-    io.emit('pushMsg', '服务端返回的消息：' + data)
+  socket.on('searchHistoryMessage', async (data) => {
+    let message = await api.searchHistoryMessage(data)
+    io.emit('getHistoryMessage', message)
   })
 })
 

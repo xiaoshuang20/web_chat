@@ -1,8 +1,12 @@
 <template>
   <div class="content">
     <div class="window">
-      <BubbleFrame :isSend="false" />
-      <BubbleFrame :isSend="true" />
+      <BubbleFrame
+        v-for="msg in props.message"
+        :key="msg._id"
+        :isSend="msg.from?.name === 'xiao'"
+        :content="msg.content"
+      />
     </div>
     <div class="write">
       <div class="emoji">
@@ -23,6 +27,8 @@
 
 <script setup>
 import BubbleFrame from './BubbleFrame.vue'
+
+let props = defineProps(['message'])
 
 let test = ref('')
 </script>

@@ -4,7 +4,7 @@
       <BubbleFrame
         v-for="msg in props.message"
         :key="msg._id"
-        :isSend="msg.from?.name === 'xiao'"
+        :isSend="msg.from?.name === currentUser"
         :content="msg.content"
       />
     </div>
@@ -31,6 +31,7 @@ import BubbleFrame from './BubbleFrame.vue'
 let props = defineProps(['message'])
 
 let test = ref('')
+let currentUser = ref('xiao')
 </script>
 
 <style scoped lang="less">

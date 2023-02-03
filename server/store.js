@@ -5,6 +5,7 @@ export default {
   async searchHistoryMessage(name) {
     let res = await this.uitl(name)
     if (res.length === 0) {
+      // xiao-test 和 test-xiao 消息记录是一样的
       const arr = name.split('-')
       res = await this.uitl(arr.reverse().join('-'))
     }

@@ -102,8 +102,8 @@ const getHistoryMessage = () => {
     `${currentUser.value}-${targetUser.value}`
   )
   socket.on('getHistoryMessage', (res) => {
-    message.value = res
     console.log(res)
+    message.value = res
   })
 }
 </script>

@@ -3,8 +3,8 @@ import api from './store.js'
 
 const io = new Server({
   cors: {
-    origin: '*'
-  }
+    origin: '*',
+  },
 })
 
 io.sockets.on('connection', (socket) => {

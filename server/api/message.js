@@ -26,17 +26,17 @@ let message = {
     name: 'test',
     avatarUrl: '',
     type: 'user',
-    id: 'irJ2AAAU'
+    id: 'irJ2AAAU',
   },
   to: {
     name: 'xiao',
     avatarUrl: '',
     type: 'user',
-    id: 'ilUEJJJK'
+    id: 'ilUEJJJK',
   },
   content: '你好, xiao, 我是测试test',
   type: 'text',
-  _id: '1'
+  _id: '1',
 }
 const queryUsersMessage = Bmob.Query('user_message')
 queryUsersMessage.equalTo('users', '==', 'xiao-test')

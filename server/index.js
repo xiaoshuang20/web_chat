@@ -7,6 +7,9 @@ import api from './api.js'
 const app = express()
 const httpServer = createServer(app)
 io.attach(httpServer)
+// 内容解析并赋值给 res.body
+app.use(express.urlencoded({ extended: false }))
+app.use(express.json())
 api(app)
 
 httpServer.listen(3000, () => {

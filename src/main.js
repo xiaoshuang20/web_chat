@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import drag from './utils/v-drag'
+import { drag } from './utils'
 import router from './router'
 import './assets/css/common.less'
 

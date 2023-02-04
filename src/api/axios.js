@@ -29,6 +29,7 @@ axios.interceptors.response.use(
 
 // 封装 GET POST 请求并导出
 export function request(url = '', params = {}, type = 'GET') {
+  console.log(params)
   return new Promise((resolve, reject) => {
     let promise
     switch (type) {

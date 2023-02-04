@@ -1,4 +1,4 @@
-const drag = {
+export const drag = {
   beforeMount(el) {
     const div = el // 当前元素
     let minTop = div.getAttribute('drag-min-top') // 极限距离
@@ -40,7 +40,5 @@ const drag = {
       // return false不加的话可能导致黏连，拖到一个地方时div粘在鼠标上不下来，相当于onmouseup失效
       return false
     }
-  }
+  },
 }
-
-export default drag

@@ -45,6 +45,7 @@
 <script setup>
 import circleUrl from '@/assets/images/avatar.jpg'
 import api from '@/api/login'
+import { message } from '@/utils'
 
 let body = ref({
   username: '',
@@ -54,12 +55,28 @@ let body = ref({
 // 注册
 let loading = ref(false)
 const register = async () => {
-  let res = await api.register({ data: body.value })
+  loading.value = true
+  let res = await api.register(body.value)
+  console.log(res)
+  if (res.data === 'success') {
+    message.success('注册成功')
+  } else {
+    message.warn('可恶, 这个名称被人抢先一步占了')
+  }
+  loading.value = false
 }
 
 // 登录
 let loading1 = ref(false)
-const login = () => {}
+const login = async () => {
+  let res = await api.login(body.value)
+  if (res.status === 200) {
+    message.success('登录成功，欢迎回来~')
+  } else {
+    message.error('啊哦, 出了点小问题')
+  }
+  loading.value = false
+}
 </script>
 
 <style scoped lang="less">

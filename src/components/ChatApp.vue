@@ -63,7 +63,6 @@
 import circleUrl from '@/assets/images/avatar.jpg'
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
-import UserService from '@/api/user.js'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
 onMounted(() => {
@@ -86,11 +85,11 @@ const changeCurrent = (index) => {
   current.value = index
 }
 const users = ref([])
-const getAllFriend = async () => {
-  let res = await UserService.getAllFriends({ id: 'irJ2AAAU' })
-  users.value = res.data
-  targetUser.value = res.data[0].name
-}
+// const getAllFriend = async () => {
+//   let res = await UserService.getAllFriends({ id: 'irJ2AAAU' })
+//   users.value = res.data
+//   targetUser.value = res.data[0].name
+// }
 
 /**
  * > 消息区域

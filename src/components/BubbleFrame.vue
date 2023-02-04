@@ -2,7 +2,7 @@
   <div
     :class="{
       receive: !props.isSend,
-      send: props.isSend
+      send: props.isSend,
     }"
   >
     <div class="chat-bubble-avatar" v-if="!props.isSend">

@@ -28,7 +28,7 @@ axios.interceptors.response.use(
 )
 
 // 封装 GET POST 请求并导出
-export function request(url = '', params = {}, type = 'GET', header = false) {
+export function request(url = '', params = {}, type = 'GET') {
   return new Promise((resolve, reject) => {
     let promise
     switch (type) {
@@ -36,15 +36,7 @@ export function request(url = '', params = {}, type = 'GET', header = false) {
         promise = axios.get(url, { params })
         break
       case 'POST':
-        promise = axios.post(
-          url,
-          params,
-          header
-            ? {
-                headers: { 'Content-Type': 'multipart/form-data' }
-              }
-            : {}
-        )
+        promise = axios.post(url, params)
         break
       case 'DELETE':
         promise = axios.delete(url, params)

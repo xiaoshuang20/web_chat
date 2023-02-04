@@ -1,6 +1,8 @@
 import Bmob from 'hydrogen-js-sdk'
 
-export default {
+const user = {}
+
+const message = {
   // 获取聊天信息
   async searchHistoryMessage(name) {
     let res = await this.uitl(name)
@@ -18,4 +20,9 @@ export default {
     let res = await queryUsersMessage.find()
     return res
   },
+}
+
+export default {
+  ...user,
+  ...message,
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="web_chat">
-    <ChatApp />
+    <router-view></router-view>
   </div>
 </template>
 

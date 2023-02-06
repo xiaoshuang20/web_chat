@@ -46,6 +46,7 @@
 import circleUrl from '@/assets/images/avatar.jpg'
 import api from '@/api/login'
 import { message } from '@/utils'
+// import router from 'vue-router'
 
 let body = ref({
   username: '',
@@ -60,6 +61,8 @@ const register = async () => {
   console.log(res)
   if (res.data === 'success') {
     message.success('注册成功')
+    window.localStorage.setItem('user', res)
+    // router.push({ path: '/chat' })
   } else {
     message.warn('可恶, 这个名称被人抢先一步占了')
   }
@@ -72,6 +75,7 @@ const login = async () => {
   let res = await api.login(body.value)
   if (res.status === 200) {
     message.success('登录成功，欢迎回来~')
+    window.localStorage.setItem('user', res)
   } else {
     message.error('啊哦, 出了点小问题')
   }

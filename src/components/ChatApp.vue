@@ -72,8 +72,8 @@ onMounted(() => {
 
 const initConnect = async () => {
   getAllFriend()
-  // getHistoryMessage()
   socket.on('getAllFriend1', changeFriends)
+  socket.on('getHistoryMessage1', changeMessage)
 }
 
 /**
@@ -96,21 +96,20 @@ const changeFriends = (data) => {
 let current = ref() // 当前选中用户
 const changeCurrent = (index) => {
   current.value = index
+  targetUser.value = friends.value[index].name
+  getHistoryMessage()
 }
 
 /**
  * > 消息区域
  */
-let message = ref([])
 const getHistoryMessage = () => {
-  socket.emit(
-    'searchHistoryMessage',
-    `${currentUser.value}-${targetUser.value}`
-  )
-  socket.on('getHistoryMessage', (res) => {
-    console.log(res)
-    message.value = res
-  })
+  socket.emit('getHistoryMessage', `${currentUser.value}-${targetUser.value}`)
+}
+
+let message = ref([]) // 历史记录
+const changeMessage = (data) => {
+  message.value = data
 }
 </script>
 

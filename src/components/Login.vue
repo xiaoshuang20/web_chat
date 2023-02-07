@@ -15,7 +15,12 @@
             <Epuser />
           </template>
         </el-input>
-        <el-input v-model="body.password" placeholder="密码" type="password">
+        <el-input
+          v-model="body.password"
+          placeholder="密码"
+          type="password"
+          @keydown.enter="login"
+        >
           <template #prefix>
             <Eplock />
           </template>

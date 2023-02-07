@@ -17,9 +17,9 @@ io.on('connection', (socket) => {
   })
 
   // > 消息区域
-  socket.on('searchHistoryMessage', async (data) => {
-    let message = await api.searchHistoryMessage(data)
-    io.emit('getHistoryMessage', message)
+  socket.on('getHistoryMessage', async (data) => {
+    let message = await api.getHistoryMessage(data)
+    io.emit('getHistoryMessage1', message)
   })
 })
 

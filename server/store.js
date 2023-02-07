@@ -43,7 +43,7 @@ const user = {
 
 const message = {
   // 获取聊天信息
-  async searchHistoryMessage(name) {
+  async getHistoryMessage(name) {
     let res = await this.uitl(name)
     if (res.length === 0) {
       // xiao-test 和 test-xiao 消息记录是一样的

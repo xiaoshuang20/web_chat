@@ -76,6 +76,7 @@ const login = async () => {
   if (res.status === 200) {
     message.success('登录成功，欢迎回来~')
     window.localStorage.setItem('user', res)
+    // router.push({ path: '/chat' })
   } else {
     message.error('啊哦, 出了点小问题')
   }

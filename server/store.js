@@ -1,6 +1,14 @@
 import Bmob from 'hydrogen-js-sdk'
 
-const user = {}
+const user = {
+  async login(data) {
+    const queryUsers = Bmob.Query('users')
+  },
+
+  async register(data) {
+    const queryUsers = Bmob.Query('users')
+  },
+}
 
 const message = {
   // 获取聊天信息

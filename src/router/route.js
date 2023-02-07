@@ -6,7 +6,7 @@ export const routes = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/components/Login/login.vue'),
+    component: () => import('@/components/Login.vue'),
   },
   {
     path: '/chat',

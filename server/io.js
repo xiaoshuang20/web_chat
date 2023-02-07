@@ -11,15 +11,6 @@ io.sockets.on('connection', (socket) => {
   console.log('user connected')
 
   // > 用户区域
-  socket.on('login', async (data) => {
-    let res = await api.login(data)
-    console.log(res)
-  })
-
-  socket.on('register', async (data) => {
-    let res = await api.register(data)
-    console.log(res)
-  })
 
   // > 消息区域
   socket.on('searchHistoryMessage', async (data) => {

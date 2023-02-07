@@ -46,7 +46,9 @@
 import circleUrl from '@/assets/images/avatar.jpg'
 import api from '@/api/login'
 import { message } from '@/utils'
-// import router from 'vue-router'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 let body = ref({
   username: '',
@@ -58,13 +60,19 @@ let loading = ref(false)
 const register = async () => {
   loading.value = true
   let res = await api.register(body.value)
-  console.log(res)
-  if (res.data === 'success') {
+  if (res.data.type === 'success') {
     message.success('注册成功')
-    window.localStorage.setItem('user', res)
-    // router.push({ path: '/chat' })
+    // 持续性存储
+    window.sessionStorage.setItem(
+      'current_user',
+      JSON.stringify({
+        ...body.value,
+        id: res.data.id,
+      })
+    )
+    router.push('/chat')
   } else {
-    message.warn('可恶, 这个名称被人抢先一步占了')
+    message.warn('可恶, 这个名称被人抢先一步占了(ノ｀Д)ノ')
   }
   loading.value = false
 }
@@ -73,10 +81,18 @@ const register = async () => {
 let loading1 = ref(false)
 const login = async () => {
   let res = await api.login(body.value)
-  if (res.status === 200) {
+  console.log(res)
+  if (res.data !== 'fail') {
     message.success('登录成功，欢迎回来~')
-    window.localStorage.setItem('user', res)
-    // router.push({ path: '/chat' })
+    // 持续性存储
+    window.sessionStorage.setItem(
+      'current_user',
+      JSON.stringify({
+        ...body.value,
+        id: res.data.objectId,
+      })
+    )
+    router.push('/chat')
   } else {
     message.error('啊哦, 出了点小问题')
   }

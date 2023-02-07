@@ -30,7 +30,7 @@
         </div>
         <ul>
           <li
-            v-for="(user, index) in users"
+            v-for="(user, index) in friends"
             :key="user.objectId"
             @click="changeCurrent(index)"
             :class="{ active: current === index }"
@@ -65,31 +65,38 @@ import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
+
 onMounted(() => {
   initConnect()
 })
 
 const initConnect = async () => {
-  await getAllFriend()
-  getHistoryMessage()
+  getAllFriend()
+  // getHistoryMessage()
+  socket.on('getAllFriend1', changeFriends)
 }
-const test = ref('')
-let currentUser = ref('xiao')
-let targetUser = ref('')
 
 /**
  * > 用户区域
  */
-let current = ref(0) // 当前选中用户
+let currentUser = ref('')
+let targetUser = ref('')
+// 获取所有好友
+const getAllFriend = async () => {
+  let session = JSON.parse(window.sessionStorage.getItem('current_user'))
+  currentUser.value = session.username
+  socket.emit('getAllFriend', session.id)
+}
+
+const friends = ref([]) // 好友列表
+const changeFriends = (data) => {
+  friends.value = data
+}
+
+let current = ref() // 当前选中用户
 const changeCurrent = (index) => {
   current.value = index
 }
-const users = ref([])
-// const getAllFriend = async () => {
-//   let res = await UserService.getAllFriends({ id: 'irJ2AAAU' })
-//   users.value = res.data
-//   targetUser.value = res.data[0].name
-// }
 
 /**
  * > 消息区域

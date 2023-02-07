@@ -10,6 +10,7 @@ export const routes = [
   },
   {
     path: '/chat',
+    name: 'chat',
     component: () => import('@/components/ChatApp.vue'),
   },
 ]

@@ -9,6 +9,8 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   if (to.path === '/chat') {
     // 登录判断
+    let user = JSON.parse(window.sessionStorage.getItem('current_user'))
+    if (!user) next('/login')
   }
   next()
 })

@@ -1,6 +1,7 @@
 import Bmob from 'hydrogen-js-sdk'
 
 const user = {
+  // 用户登录
   async login(data) {
     const queryUsers = Bmob.Query('users')
     queryUsers.equalTo('name', '==', data.username)
@@ -28,6 +29,15 @@ const user = {
     } else {
       return false
     }
+  },
+
+  // 获取所有好友
+  async getAllFriend(id) {
+    const queryUsers = Bmob.Query('users')
+    // 筛选条件
+    queryUsers.field('friends', id)
+    let res = await queryUsers.relation('users')
+    return res.results
   },
 }
 

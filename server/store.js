@@ -39,6 +39,8 @@ const user = {
     let res = await queryUsers.relation('users')
     return res.results
   },
+
+  // 添加好友
 }
 
 const message = {

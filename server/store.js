@@ -44,6 +44,13 @@ const user = {
 }
 
 const message = {
+  async uitl(name) {
+    const queryUsersMessage = Bmob.Query('user_message')
+    queryUsersMessage.equalTo('users', '==', name)
+    let res = await queryUsersMessage.find()
+    return res
+  },
+
   // 获取聊天信息
   async getHistoryMessage(name) {
     let res = await this.uitl(name)
@@ -54,12 +61,17 @@ const message = {
     }
     return res[0].message
   },
-
-  async uitl(name) {
+  // 发送信息
+  async sendMessage(name, msg) {
     const queryUsersMessage = Bmob.Query('user_message')
-    queryUsersMessage.equalTo('users', '==', name)
-    let res = await queryUsersMessage.find()
-    return res
+    let res = await this.uitl(name)
+    if (res.length === 0) {
+      const arr = name.split('-')
+      res = await this.uitl(arr.reverse().join('-'))
+    }
+    let res1 = queryUsersMessage.get(res[0].objectId)
+    res1.add('message', [msg])
+    res1.save()
   },
 }
 

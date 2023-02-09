@@ -56,7 +56,7 @@
       </div>
       <BackgroundPanel
         :message="message"
-        :currentUser="currentUser"
+        :currentUser="currentUser.name"
         @sendMessage="sendMessage"
       />
     </div>
@@ -80,16 +80,18 @@ const initConnect = async () => {
   socket.on('getHistoryMessage1', changeMessage)
 }
 
+let room = computed(() => `${currentUser.value.name}-${targetUser.value.name}`)
+
 /**
  * > 用户区域
  */
-let currentUser = ref('')
-let targetUser = ref('')
+let currentUser = ref({})
+let targetUser = ref({})
 // 获取所有好友
 const getAllFriend = async () => {
   let session = JSON.parse(window.sessionStorage.getItem('current_user'))
-  currentUser.value = session.username
-  socket.emit('getAllFriend', session.id)
+  currentUser.value = session
+  socket.emit('getAllFriend', session.objectId)
 }
 
 const friends = ref([]) // 好友列表
@@ -100,7 +102,7 @@ const changeFriends = (data) => {
 let current = ref() // 当前选中用户
 const changeCurrent = (index) => {
   current.value = index
-  targetUser.value = friends.value[index].name
+  targetUser.value = friends.value[index]
   getHistoryMessage()
 }
 
@@ -108,18 +110,29 @@ const changeCurrent = (index) => {
  * > 消息区域
  */
 const getHistoryMessage = () => {
-  socket.emit('getHistoryMessage', `${currentUser.value}-${targetUser.value}`)
+  socket.emit('getHistoryMessage', room.value)
 }
 
 let message = ref([]) // 历史记录
 const changeMessage = (data) => {
-  console.log(data)
-  message.value = data
+  if (data) message.value = data
 }
 
-const sendMessage = (msg) => {
+// 添加信息
+const addMessage = (msg) => {
   console.log(msg)
-  console.log(currentUser.value, targetUser.value)
+  message.value.push(msg)
+}
+
+// 发送信息
+const sendMessage = (msg) => {
+  let body = {
+    from: currentUser.value,
+    to: targetUser.value,
+    content: msg,
+  }
+  addMessage(body)
+  socket.emit('sendMessage', room.value, body)
 }
 </script>
 

@@ -21,6 +21,10 @@ io.on('connection', (socket) => {
     let message = await api.getHistoryMessage(data)
     io.emit('getHistoryMessage1', message)
   })
+
+  socket.on('sendMessage', async (name, data) => {
+    let res = await api.sendMessage(name, data)
+  })
 })
 
 export default io

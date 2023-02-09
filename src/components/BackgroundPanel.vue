@@ -2,8 +2,8 @@
   <div class="content">
     <div class="window">
       <BubbleFrame
-        v-for="msg in props.message"
-        :key="msg._id"
+        v-for="(msg, index) in props.message"
+        :key="index"
         :isSend="msg.from?.name === props.currentUser"
         :content="msg.content"
       />
@@ -30,7 +30,6 @@
 </template>
 
 <script setup>
-import { nextTick } from 'vue'
 import BubbleFrame from './BubbleFrame.vue'
 
 let props = defineProps(['message', 'currentUser'])
@@ -58,6 +57,7 @@ const sendMessage = () => {
   .window {
     height: 65%;
     width: 100%;
+    overflow: auto;
     background-color: #e6f8fa;
   }
 

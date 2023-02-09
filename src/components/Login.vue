@@ -68,13 +68,7 @@ const register = async () => {
   if (res.data.type === 'success') {
     message.success('注册成功')
     // 持续性存储
-    window.sessionStorage.setItem(
-      'current_user',
-      JSON.stringify({
-        ...body.value,
-        id: res.data.id,
-      })
-    )
+    window.sessionStorage.setItem('current_user', JSON.stringify(res.data))
     router.push('/chat')
   } else {
     message.warn('可恶, 这个名称被人抢先一步占了(ノ｀Д)ノ')
@@ -90,13 +84,7 @@ const login = async () => {
   if (res.data !== 'fail') {
     message.success('登录成功，欢迎回来~')
     // 持续性存储
-    window.sessionStorage.setItem(
-      'current_user',
-      JSON.stringify({
-        ...body.value,
-        id: res.data.objectId,
-      })
-    )
+    window.sessionStorage.setItem('current_user', JSON.stringify(res.data))
     router.push('/chat')
   } else {
     message.error('啊哦, 出了点小问题')

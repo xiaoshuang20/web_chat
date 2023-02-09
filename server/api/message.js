@@ -43,17 +43,17 @@ queryUsersMessage.equalTo('users', '==', 'xiao-test')
 queryUsersMessage
   .find()
   .then((res) => {
-    queryUsersMessage.get(res[0].objectId).then((res) => {
-      console.log(res)
-      res.add('message', [message])
-      res.save()
-    })
-    // 清空记录
     // queryUsersMessage.get(res[0].objectId).then((res) => {
     //   console.log(res)
-    //   res.unset('message')
+    //   res.add('message', [message])
     //   res.save()
     // })
+    // 清空记录
+    queryUsersMessage.get(res[0].objectId).then((res) => {
+      console.log(res)
+      res.unset('message')
+      res.save()
+    })
   })
   .catch((err) => {
     console.log(err)

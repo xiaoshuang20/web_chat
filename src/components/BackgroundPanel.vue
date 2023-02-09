@@ -4,7 +4,7 @@
       <BubbleFrame
         v-for="msg in props.message"
         :key="msg._id"
-        :isSend="msg.from?.name === currentUser"
+        :isSend="msg.from?.name === props.currentUser"
         :content="msg.content"
       />
     </div>
@@ -13,10 +13,14 @@
         <span class="iconfont icon-expression"></span>
       </div>
       <div class="text">
-        <el-input type="textarea" v-model="test" />
+        <el-input
+          type="textarea"
+          v-model="message"
+          @keydown.enter.stop="sendMessage"
+        />
       </div>
       <div class="send">
-        <el-button>
+        <el-button @click="sendMessage">
           发送
           <EpPromotion class="icon" />
         </el-button>
@@ -26,12 +30,24 @@
 </template>
 
 <script setup>
+import { nextTick } from 'vue'
 import BubbleFrame from './BubbleFrame.vue'
 
-let props = defineProps(['message'])
+let props = defineProps(['message', 'currentUser'])
+let emits = defineEmits(['sendMessage'])
 
-let test = ref('')
-let currentUser = ref('xiao')
+// 发送消息
+let message = ref('')
+const sendMessage = () => {
+  // 去除回车符
+  message.value = message.value.replace(/^\s+|\s+$/g, '')
+  if (message.value) {
+    emits('sendMessage', message.value)
+  }
+  setTimeout(() => {
+    message.value = ''
+  }, 0)
+}
 </script>
 
 <style scoped lang="less">

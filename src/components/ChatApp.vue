@@ -54,7 +54,11 @@
           进阶功能（我的/好友请求/气泡样式/历史记录/创建房间）
         </div>
       </div>
-      <BackgroundPanel :message="message" />
+      <BackgroundPanel
+        :message="message"
+        :currentUser="currentUser"
+        @sendMessage="sendMessage"
+      />
     </div>
   </div>
 </template>
@@ -109,7 +113,13 @@ const getHistoryMessage = () => {
 
 let message = ref([]) // 历史记录
 const changeMessage = (data) => {
+  console.log(data)
   message.value = data
+}
+
+const sendMessage = (msg) => {
+  console.log(msg)
+  console.log(currentUser.value, targetUser.value)
 }
 </script>
 

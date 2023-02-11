@@ -24,6 +24,7 @@ io.on('connection', (socket) => {
 
   socket.on('sendMessage', async (name, data) => {
     let res = await api.sendMessage(name, data)
+    socket.broadcast.emit()
   })
 })
 

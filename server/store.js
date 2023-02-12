@@ -24,6 +24,9 @@ const user = {
       queryUsers.set('name', data.username)
       queryUsers.set('password', data.password)
       queryUsers.set('type', 'user')
+      queryUsers.set('avatarUrl', '/img/avatar.jpg')
+      queryUsers.set('roomID', data.id)
+      queryUsers.set('signature', '这里什么也没有哦~')
       let res = await queryUsers.save()
       return res
     } else {
@@ -41,6 +44,14 @@ const user = {
   },
 
   // 添加好友
+  async addFriends(name, user) {
+    console.log(name)
+    const queryUsers = Bmob.Query('users')
+    queryUsers.equalTo('name', '==', name)
+    let res = await queryUsers.find()
+    if (res.length === 0) return false
+    return res[0]
+  },
 }
 
 const message = {
@@ -69,9 +80,10 @@ const message = {
       const arr = name.split('-')
       res = await this.uitl(arr.reverse().join('-'))
     }
-    let res1 = queryUsersMessage.get(res[0].objectId)
+    let res1 = await queryUsersMessage.get(res[0].objectId)
     res1.add('message', [msg])
     res1.save()
+    return true
   },
 }
 

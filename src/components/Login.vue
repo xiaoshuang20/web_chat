@@ -7,7 +7,7 @@
         </div>
       </template>
       <div class="avatar">
-        <el-avatar :size="80" :src="circleUrl" />
+        <el-avatar :size="80" src="/img/avatar.jpg" />
       </div>
       <div class="input">
         <el-input v-model="body.username" placeholder="用户名">
@@ -48,12 +48,19 @@
 </template>
 
 <script setup>
-import circleUrl from '@/assets/images/avatar.jpg'
-import api from '@/api/login'
 import { message } from '@/utils'
 import { useRouter } from 'vue-router'
+import { io } from 'socket.io-client'
 
 const router = useRouter()
+const socket = io()
+
+onMounted(() => {
+  socket.on('registerSuccess', registerSuccess)
+  socket.on('registerFail', registerFail)
+  socket.on('loginSuccess', loginSuccess)
+  socket.on('loginFail', loginFail)
+})
 
 let body = ref({
   username: '',
@@ -64,32 +71,37 @@ let body = ref({
 let loading = ref(false)
 const register = async () => {
   loading.value = true
-  let res = await api.register(body.value)
-  if (res.data.type === 'success') {
-    message.success('注册成功')
-    // 持续性存储
-    window.sessionStorage.setItem('current_user', JSON.stringify(res.data))
-    router.push('/chat')
-  } else {
-    message.warn('可恶, 这个名称被人抢先一步占了(ノ｀Д)ノ')
-  }
+  socket.emit('register', body.value)
+}
+const registerSuccess = (data) => {
+  window.sessionStorage.setItem(
+    'current_user',
+    JSON.stringify({ ...body.value, id: data.objectId })
+  )
+  message.success('注册成功')
+  router.push('/chat')
+  loading.value = false
+}
+const registerFail = () => {
+  message.warn('可恶, 这个名称被人抢先一步占了(ノ｀Д)ノ')
   loading.value = false
 }
 
 // 登录
 let loading1 = ref(false)
 const login = async () => {
-  let res = await api.login(body.value)
-  console.log(res)
-  if (res.data !== 'fail') {
-    message.success('登录成功，欢迎回来~')
-    // 持续性存储
-    window.sessionStorage.setItem('current_user', JSON.stringify(res.data))
-    router.push('/chat')
-  } else {
-    message.error('啊哦, 出了点小问题')
-  }
-  loading.value = false
+  loading1.value = true
+  socket.emit('login', body.value)
+}
+const loginSuccess = (data) => {
+  window.sessionStorage.setItem('current_user', JSON.stringify(data))
+  message.success('登录成功，欢迎回来~')
+  router.push('/chat')
+  loading1.value = false
+}
+const loginFail = () => {
+  message.error('啊哦, 账号密码好像不对欸')
+  loading1.value = false
 }
 </script>
 

@@ -24,11 +24,11 @@
               <Epsearch />
             </template>
           </el-input>
-          <el-button type="primary">
+          <el-button type="primary" @click.stop="dialogVisible = true">
             <EpPlus />
           </el-button>
         </div>
-        <ul>
+        <ul v-if="friends">
           <li
             v-for="(user, index) in friends"
             :key="user.objectId"
@@ -36,7 +36,7 @@
             :class="{ active: current === index }"
           >
             <div class="left">
-              <el-avatar :size="40" :src="circleUrl" />
+              <el-avatar :size="40" :src="user.avatarUrl" />
             </div>
             <div class="center">
               <span>{{ user.name }}</span>
@@ -50,21 +50,53 @@
             </div>
           </li>
         </ul>
+        <p v-else>还没有好友哦!</p>
         <div class="footer">
           进阶功能（我的/好友请求/气泡样式/历史记录/创建房间）
         </div>
       </div>
       <BackgroundPanel
+        v-if="targetUser"
         :message="message"
         :currentUser="currentUser.name"
         @sendMessage="sendMessage"
       />
+      <div class="emptyUser" v-else>这里还什么也没有哦, 快去跟好友聊天吧！</div>
     </div>
   </div>
+  <el-dialog
+    v-model="dialogVisible"
+    title="添加好友"
+    width="30%"
+    :modal="false"
+    draggable
+    @close-auto-focus="handleClose"
+    @close="handleClose"
+  >
+    <div
+      :style="{
+        display: 'flex',
+        alignItems: 'center',
+      }"
+    >
+      <span
+        :style="{
+          width: '40px',
+        }"
+        >昵称</span
+      >
+      <el-input v-model="addName" placeholder="请输入添加好友姓名"></el-input>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="addFriend"> 添加 </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
-import circleUrl from '@/assets/images/avatar.jpg'
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
 
@@ -75,8 +107,11 @@ onMounted(() => {
 })
 
 const initConnect = async () => {
+  currentUser.value = JSON.parse(window.sessionStorage.getItem('current_user'))
   getAllFriend()
   socket.on('getAllFriend1', changeFriends)
+  socket.on('addFriendsSuccess', addFriendsSuccess)
+  socket.on('addFriendsFail', addFriendsFail)
   socket.on('getHistoryMessage1', changeMessage)
 }
 
@@ -85,18 +120,37 @@ let room = computed(() => `${currentUser.value.name}-${targetUser.value.name}`)
 /**
  * > 用户区域
  */
-let currentUser = ref({})
-let targetUser = ref({})
+let currentUser = ref(null)
+let targetUser = ref(null)
 // 获取所有好友
 const getAllFriend = async () => {
   let session = JSON.parse(window.sessionStorage.getItem('current_user'))
   currentUser.value = session
   socket.emit('getAllFriend', session.objectId)
 }
+// 添加好友
+let dialogVisible = ref(false)
+let addName = ref('')
+const addFriend = () => {
+  if (addName.value === '') return
+  socket.emit('addFriends', addName.value, currentUser.value.name)
+}
+const handleClose = () => {
+  dialogVisible.value = false
+  addName.value = ''
+}
+const addFriendsSuccess = (data) => {}
+const addFriendsFail = (data) => {
+  ElMessage({
+    message: data,
+    type: 'warning',
+  })
+  handleClose()
+}
 
-const friends = ref([]) // 好友列表
+const friends = ref(null) // 好友列表
 const changeFriends = (data) => {
-  friends.value = data
+  if (data.length !== 0) friends.value = data
 }
 
 let current = ref() // 当前选中用户
@@ -318,6 +372,15 @@ const sendMessage = (msg) => {
         }
       }
 
+      p {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 50%;
+        color: #a8b2ca;
+      }
+
       .footer {
         position: absolute;
         bottom: 0;
@@ -325,6 +388,17 @@ const sendMessage = (msg) => {
         width: 100%;
         background-color: pink;
       }
+    }
+
+    .emptyUser {
+      flex: 3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+      color: #a8b2ca;
+      background-color: #e6f8fa;
     }
   }
 }

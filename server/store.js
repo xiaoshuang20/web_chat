@@ -50,7 +50,15 @@ const user = {
     queryUsers.equalTo('name', '==', name)
     let res = await queryUsers.find()
     if (res.length === 0) return false
-    return res[0]
+    if (
+      this.add(res[0].objectId, user.objectId) &&
+      this.add(user.objectId, res[0].objectId)
+    )
+      return true
+  },
+
+  async add(user1, user2) {
+    return true
   },
 }
 

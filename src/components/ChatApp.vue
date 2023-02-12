@@ -133,13 +133,19 @@ let dialogVisible = ref(false)
 let addName = ref('')
 const addFriend = () => {
   if (addName.value === '') return
-  socket.emit('addFriends', addName.value, currentUser.value.name)
+  socket.emit('addFriends', addName.value, currentUser.value)
 }
 const handleClose = () => {
   dialogVisible.value = false
   addName.value = ''
 }
-const addFriendsSuccess = (data) => {}
+const addFriendsSuccess = (data) => {
+  ElMessage({
+    message: data,
+    type: 'success',
+  })
+  handleClose()
+}
 const addFriendsFail = (data) => {
   ElMessage({
     message: data,

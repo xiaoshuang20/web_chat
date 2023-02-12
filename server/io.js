@@ -35,7 +35,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('addFriends', async (data, user) => {
-    if (data === user) {
+    if (data === user.name) {
       io.emit('addFriendsFail', '不能添加自己为好友哦~')
       return
     }
@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
       io.emit('addFriendsFail', '搜索用户不存在诶')
       return
     }
-    io.emit('addFriendsSuccess', res)
+    io.emit('addFriendsSuccess', '添加成功, 快来聊天吧')
   })
 
   // > 消息区域

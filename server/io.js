@@ -1,4 +1,4 @@
-import { Server, Socket } from 'socket.io'
+import { Server } from 'socket.io'
 import api from './store.js'
 
 const io = new Server({
@@ -35,7 +35,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('addFriends', async (data, user) => {
-    if (data === user.name) {
+    if (data === user.username) {
       io.emit('addFriendsFail', '不能添加自己为好友哦~')
       return
     }

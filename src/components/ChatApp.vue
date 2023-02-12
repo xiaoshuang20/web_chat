@@ -123,10 +123,8 @@ let room = computed(() => `${currentUser.value.name}-${targetUser.value.name}`)
 let currentUser = ref(null)
 let targetUser = ref(null)
 // 获取所有好友
-const getAllFriend = async () => {
-  let session = JSON.parse(window.sessionStorage.getItem('current_user'))
-  currentUser.value = session
-  socket.emit('getAllFriend', session.objectId)
+const getAllFriend = () => {
+  socket.emit('getAllFriend', currentUser.value.id)
 }
 // 添加好友
 let dialogVisible = ref(false)
@@ -140,6 +138,12 @@ const handleClose = () => {
   addName.value = ''
 }
 const addFriendsSuccess = (data) => {
+  // mdzz，不知道为什么，在添加好友后重新获取好友数据在第二次才能请求到
+  // 艹，有 bug
+  getAllFriend()
+  nextTick(() => {
+    getAllFriend()
+  })
   ElMessage({
     message: data,
     type: 'success',
@@ -156,6 +160,7 @@ const addFriendsFail = (data) => {
 
 const friends = ref(null) // 好友列表
 const changeFriends = (data) => {
+  console.log(data)
   if (data.length !== 0) friends.value = data
 }
 

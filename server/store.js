@@ -45,19 +45,23 @@ const user = {
 
   // 添加好友
   async addFriends(name, user) {
-    console.log(name)
     const queryUsers = Bmob.Query('users')
     queryUsers.equalTo('name', '==', name)
     let res = await queryUsers.find()
     if (res.length === 0) return false
-    if (
-      this.add(res[0].objectId, user.objectId) &&
-      this.add(user.objectId, res[0].objectId)
-    )
-      return true
-  },
 
+    let flag1 = await this.add(res[0].objectId, user.id)
+    let flag2 = await this.add(user.id, res[0].objectId)
+    if (flag1 && flag2) return true
+  },
   async add(user1, user2) {
+    const relation = Bmob.Relation('users')
+    const relID = relation.add(user2)
+    const queryUsers = Bmob.Query('users')
+    queryUsers.get(user1).then((res) => {
+      res.set('friends', relID) // 将Relation对象保存到two字段中，即实现了一对多的关联
+      res.save()
+    })
     return true
   },
 }

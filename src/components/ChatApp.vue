@@ -50,7 +50,7 @@
             </div>
           </li>
         </ul>
-        <p v-else>还没有好友哦!</p>
+        <p v-else class="no_friends">还没有好友哦!</p>
         <div class="footer">
           进阶功能（我的/好友请求/气泡样式/历史记录/创建房间）
         </div>
@@ -382,7 +382,7 @@ const sendMessage = (msg) => {
         }
       }
 
-      p {
+      .no_friends {
         display: flex;
         justify-content: center;
         align-items: center;

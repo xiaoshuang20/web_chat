@@ -31,11 +31,11 @@ io.on('connection', (socket) => {
 
   socket.on('getAllFriend', async (data) => {
     let friends = await api.getAllFriend(data)
-    io.emit('getAllFriend1', friends)
+    io.emit('getAllFriendSuccess', friends)
   })
 
   socket.on('addFriends', async (data, user) => {
-    if (data === user.username) {
+    if (data === user.name) {
       io.emit('addFriendsFail', '不能添加自己为好友哦~')
       return
     }
@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
       io.emit('addFriendsFail', '搜索用户不存在诶')
       return
     }
-    io.emit('addFriendsSuccess', '添加成功, 快来聊天吧')
+    io.emit('addFriendsSuccess', res)
   })
 
   // > 消息区域

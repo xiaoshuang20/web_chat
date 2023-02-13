@@ -109,7 +109,7 @@ onMounted(() => {
 const initConnect = async () => {
   currentUser.value = JSON.parse(window.sessionStorage.getItem('current_user'))
   getAllFriend()
-  socket.on('getAllFriend1', changeFriends)
+  socket.on('getAllFriendSuccess', changeFriends)
   socket.on('addFriendsSuccess', addFriendsSuccess)
   socket.on('addFriendsFail', addFriendsFail)
   socket.on('getHistoryMessage1', changeMessage)
@@ -123,8 +123,12 @@ let room = computed(() => `${currentUser.value.name}-${targetUser.value.name}`)
 let currentUser = ref(null)
 let targetUser = ref(null)
 // 获取所有好友
+const friends = ref(null) // 好友列表
 const getAllFriend = () => {
-  socket.emit('getAllFriend', currentUser.value.id)
+  socket.emit('getAllFriend', currentUser.value.objectId)
+}
+const changeFriends = (data) => {
+  if (data.length !== 0) friends.value = data
 }
 // 添加好友
 let dialogVisible = ref(false)
@@ -133,19 +137,15 @@ const addFriend = () => {
   if (addName.value === '') return
   socket.emit('addFriends', addName.value, currentUser.value)
 }
-const handleClose = () => {
-  dialogVisible.value = false
-  addName.value = ''
-}
 const addFriendsSuccess = (data) => {
-  // mdzz，不知道为什么，在添加好友后重新获取好友数据在第二次才能请求到
-  // 艹，有 bug
-  getAllFriend()
-  nextTick(() => {
-    getAllFriend()
-  })
+  // 直接将添加的好友push到好友数组，不需要发起获取好友请求
+  if (!friends.value) {
+    friends.value = [data]
+  } else {
+    friends.value.push(data)
+  }
   ElMessage({
-    message: data,
+    message: '添加成功，快来一起聊天吧！',
     type: 'success',
   })
   handleClose()
@@ -157,12 +157,11 @@ const addFriendsFail = (data) => {
   })
   handleClose()
 }
-
-const friends = ref(null) // 好友列表
-const changeFriends = (data) => {
-  console.log(data)
-  if (data.length !== 0) friends.value = data
+const handleClose = () => {
+  dialogVisible.value = false
+  addName.value = ''
 }
+
 
 let current = ref() // 当前选中用户
 const changeCurrent = (index) => {

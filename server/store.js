@@ -4,7 +4,7 @@ const user = {
   // 用户登录
   async login(data) {
     const queryUsers = Bmob.Query('users')
-    queryUsers.equalTo('name', '==', data.username)
+    queryUsers.equalTo('name', '==', data.name)
     queryUsers.equalTo('password', '==', data.password)
     let res = await queryUsers.find()
     if (res.length === 0) {
@@ -17,11 +17,11 @@ const user = {
   // 用户注册
   async register(data) {
     const queryUsers = Bmob.Query('users')
-    queryUsers.equalTo('name', '==', data.username)
+    queryUsers.equalTo('name', '==', data.name)
     let temp = await queryUsers.find()
     // 用户名保证唯一
-    if (temp.length === 0 && !!data.username && !!data.password) {
-      queryUsers.set('name', data.username)
+    if (temp.length === 0 && !!data.name && !!data.password) {
+      queryUsers.set('name', data.name)
       queryUsers.set('password', data.password)
       queryUsers.set('type', 'user')
       queryUsers.set('avatarUrl', '/img/avatar.jpg')
@@ -50,18 +50,19 @@ const user = {
     let res = await queryUsers.find()
     if (res.length === 0) return false
 
-    let flag1 = await this.add(res[0].objectId, user.id)
-    let flag2 = await this.add(user.id, res[0].objectId)
-    if (flag1 && flag2) return true
+    let flag1 = await this.add(res[0].objectId, user.objectId)
+    let flag2 = await this.add(user.objectId, res[0].objectId)
+    if (flag1 && flag2) {
+      return res[0]
+    }
   },
   async add(user1, user2) {
     const relation = Bmob.Relation('users')
     const relID = relation.add(user2)
     const queryUsers = Bmob.Query('users')
-    queryUsers.get(user1).then((res) => {
-      res.set('friends', relID) // 将Relation对象保存到two字段中，即实现了一对多的关联
-      res.save()
-    })
+    const res = await queryUsers.get(user1)
+    res.set('friends', relID)
+    res.save()
     return true
   },
 }

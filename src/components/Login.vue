@@ -10,7 +10,7 @@
         <el-avatar :size="80" src="/img/avatar.jpg" />
       </div>
       <div class="input">
-        <el-input v-model="body.username" placeholder="用户名">
+        <el-input v-model="body.name" placeholder="用户名">
           <template #prefix>
             <Epuser />
           </template>
@@ -63,7 +63,7 @@ onMounted(() => {
 })
 
 let body = ref({
-  username: '',
+  name: '',
   password: '',
 })
 
@@ -76,7 +76,7 @@ const register = async () => {
 const registerSuccess = (data) => {
   window.sessionStorage.setItem(
     'current_user',
-    JSON.stringify({ ...body.value, id: data.objectId })
+    JSON.stringify({ ...body.value, objectId: data.objectId })
   )
   message.success('注册成功')
   router.push('/chat')

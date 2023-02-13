@@ -13,7 +13,7 @@ Bmob.initialize('bc82f997576ffeca', 'xiao')
 //   res.save()
 // })
 let id1 = '30497a417c'
-let id2 = '3181c1fd8e'
+let id2 = '1f75e80fec'
 
 const test = (id1, id2) => {
   const relation = Bmob.Relation('users')

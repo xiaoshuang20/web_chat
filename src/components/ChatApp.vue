@@ -138,7 +138,7 @@ const addFriend = () => {
   socket.emit('addFriends', addName.value, currentUser.value)
 }
 const addFriendsSuccess = (data) => {
-  // 直接将添加的好友push到好友数组，不需要发起获取好友请求
+  // 直接将添加的好友 push到好友数组，不需要发起获取好友请求
   if (!friends.value) {
     friends.value = [data]
   } else {
@@ -161,12 +161,12 @@ const handleClose = () => {
   dialogVisible.value = false
   addName.value = ''
 }
-
-
+// 切换聊天对象
 let current = ref() // 当前选中用户
 const changeCurrent = (index) => {
   current.value = index
   targetUser.value = friends.value[index]
+  console.log(targetUser.value)
   getHistoryMessage()
 }
 

@@ -107,6 +107,7 @@ onMounted(() => {
 })
 
 const initConnect = async () => {
+  // 获取当前用户
   currentUser.value = JSON.parse(window.sessionStorage.getItem('current_user'))
   getAllFriend()
   socket.on('getAllFriendSuccess', changeFriends)
@@ -114,8 +115,6 @@ const initConnect = async () => {
   socket.on('addFriendsFail', addFriendsFail)
   socket.on('getHistoryMessage1', changeMessage)
 }
-
-let room = computed(() => `${currentUser.value.name}-${targetUser.value.name}`)
 
 /**
  * > 用户区域
@@ -145,7 +144,7 @@ const addFriend = () => {
   if (addName.value === '') return
   socket.emit('addFriends', addName.value, currentUser.value)
 }
-const addFriendsSuccess = (data) => {
+const addFriendsSuccess = (data, msg) => {
   // 直接将添加的好友 push到好友数组，不需要发起获取好友请求
   if (!friends.value) {
     friends.value = [data]
@@ -153,7 +152,7 @@ const addFriendsSuccess = (data) => {
     friends.value.push(data)
   }
   ElMessage({
-    message: '添加成功，快来一起聊天吧！',
+    message: msg,
     type: 'success',
   })
   handleClose()
@@ -174,7 +173,6 @@ let current = ref() // 当前选中用户
 const changeCurrent = (index) => {
   current.value = index
   targetUser.value = friends.value[index]
-  console.log(targetUser.value)
   getHistoryMessage()
 }
 
@@ -182,7 +180,7 @@ const changeCurrent = (index) => {
  * > 消息区域
  */
 const getHistoryMessage = () => {
-  socket.emit('getHistoryMessage', room.value)
+  socket.emit('getHistoryMessage', targetUser.value)
 }
 
 let message = ref([]) // 历史记录

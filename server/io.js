@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
       io.emit('addFriendsFail', '搜索用户不存在诶')
       return
     }
-    io.emit('addFriendsSuccess', res)
+    io.emit('addFriendsSuccess', res, '添加成功，快来一起聊天吧！')
   })
 
   // > 消息区域

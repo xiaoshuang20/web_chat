@@ -128,7 +128,15 @@ const getAllFriend = () => {
   socket.emit('getAllFriend', currentUser.value.objectId)
 }
 const changeFriends = (data) => {
-  if (data.length !== 0) friends.value = data
+  if (flag.value && data.length !== 0) {
+    friends.value = data
+    setFlag()
+  }
+}
+// 避免不同页面之间的刷新互相影响
+const flag = ref(true)
+const setFlag = () => {
+  flag.value = false
 }
 // 添加好友
 let dialogVisible = ref(false)

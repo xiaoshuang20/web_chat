@@ -44,7 +44,7 @@ const user = {
   },
 
   // 添加好友
-  async addFriends(name, user) {
+  async addFriends(name, user, roomName) {
     const queryUsers = Bmob.Query('users')
     queryUsers.equalTo('name', '==', name)
     let res = await queryUsers.find()
@@ -52,7 +52,8 @@ const user = {
 
     let flag1 = await this.add(res[0].objectId, user.objectId)
     let flag2 = await this.add(user.objectId, res[0].objectId)
-    if (flag1 && flag2) {
+    let flag3 = await this.createRoom(roomName)
+    if (flag1 && flag2 && flag3) {
       return res[0]
     }
   },
@@ -64,6 +65,13 @@ const user = {
     res.set('friends', relID)
     res.save()
     return true
+  },
+  async createRoom(roomName) {
+    const queryUsersMessage = Bmob.Query('user_message')
+    queryUsersMessage.set('users', roomName)
+    let res = await queryUsersMessage.save()
+    console.log(res)
+    if (res.objectId) return true
   },
 }
 

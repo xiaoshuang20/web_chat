@@ -99,6 +99,7 @@
 <script setup>
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
+import { computed } from 'vue'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
 
@@ -121,6 +122,9 @@ const initConnect = async () => {
  */
 let currentUser = ref(null)
 let targetUser = ref(null)
+const roomName = computed(() => {
+  return `${currentUser.value?.name}_${targetUser.value?.name}`
+})
 // 获取所有好友
 const friends = ref(null) // 好友列表
 const getAllFriend = () => {
@@ -142,7 +146,12 @@ let dialogVisible = ref(false)
 let addName = ref('')
 const addFriend = () => {
   if (addName.value === '') return
-  socket.emit('addFriends', addName.value, currentUser.value)
+  socket.emit(
+    'addFriends',
+    addName.value,
+    currentUser.value,
+    `${currentUser.value?.name}_${addName.value}`
+  )
 }
 const addFriendsSuccess = (data, msg) => {
   // 直接将添加的好友 push到好友数组，不需要发起获取好友请求
@@ -180,7 +189,7 @@ const changeCurrent = (index) => {
  * > 消息区域
  */
 const getHistoryMessage = () => {
-  socket.emit('getHistoryMessage', targetUser.value)
+  socket.emit('getHistoryMessage', roomName.value)
 }
 
 let message = ref([]) // 历史记录

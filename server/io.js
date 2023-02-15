@@ -34,12 +34,12 @@ io.on('connection', (socket) => {
     io.emit('getAllFriendSuccess', friends)
   })
 
-  socket.on('addFriends', async (data, user) => {
+  socket.on('addFriends', async (data, user, roomName) => {
     if (data === user.name) {
       io.emit('addFriendsFail', '不能添加自己为好友哦~')
       return
     }
-    let res = await api.addFriends(data, user)
+    let res = await api.addFriends(data, user, roomName)
     if (!res) {
       io.emit('addFriendsFail', '搜索用户不存在诶')
       return

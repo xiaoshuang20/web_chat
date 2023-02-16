@@ -50,11 +50,15 @@ io.on('connection', (socket) => {
   // > 消息区域
   socket.on('getHistoryMessage', async (data) => {
     let message = await api.getHistoryMessage(data)
-    io.emit('getHistoryMessage1', message)
+    if (message) io.emit('getHistoryMessageSuccess', message)
   })
 
   socket.on('sendMessage', async (name, data) => {
     let res = await api.sendMessage(name, data)
+    if (!res) {
+      io.emit('sendMessageFail', '发送失败，请检查网络情况')
+      return
+    }
   })
 })
 

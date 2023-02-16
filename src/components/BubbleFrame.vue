@@ -6,25 +6,24 @@
     }"
   >
     <div class="chat-bubble-avatar" v-if="!props.isSend">
-      <el-avatar :size="40" :src="circleUrl" />
+      <el-avatar :size="40" :src="msg.to.avatarUrl" />
     </div>
     <div class="chat-bubble-msg">
       <div class="chat-bubble-time"></div>
       <div class="chat-bubble-text">
-        <ChatContent :isSend="props.isSend" :msg="props.content" />
+        <ChatContent :isSend="props.isSend" :msg="props.msg.content" />
       </div>
     </div>
     <div class="chat-bubble-avatar" v-if="props.isSend">
-      <el-avatar :size="40" :src="circleUrl" />
+      <el-avatar :size="40" :src="msg.from.avatarUrl" />
     </div>
   </div>
 </template>
 
 <script setup>
-import circleUrl from '@/assets/images/avatar.jpg'
 import ChatContent from './ChatContent.vue'
 
-let props = defineProps(['isSend', 'content'])
+let props = defineProps(['isSend', 'msg'])
 </script>
 
 <style scoped lang="less">

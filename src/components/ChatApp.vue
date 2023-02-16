@@ -114,7 +114,8 @@ const initConnect = async () => {
   socket.on('getAllFriendSuccess', changeFriends)
   socket.on('addFriendsSuccess', addFriendsSuccess)
   socket.on('addFriendsFail', addFriendsFail)
-  socket.on('getHistoryMessage1', changeMessage)
+  socket.on('getHistoryMessageSuccess', changeMessage)
+  socket.on('sendMessageFail', sendMessageFail)
 }
 
 /**
@@ -191,16 +192,9 @@ const changeCurrent = (index) => {
 const getHistoryMessage = () => {
   socket.emit('getHistoryMessage', roomName.value)
 }
-
 let message = ref([]) // 历史记录
 const changeMessage = (data) => {
   if (data) message.value = data
-}
-
-// 添加信息
-const addMessage = (msg) => {
-  console.log(msg)
-  message.value.push(msg)
 }
 
 // 发送信息
@@ -212,6 +206,16 @@ const sendMessage = (msg) => {
   }
   addMessage(body)
   socket.emit('sendMessage', room.value, body)
+}
+// 添加信息
+const addMessage = (msg) => {
+  message.value.push(msg)
+}
+const sendMessageFail = (data) => {
+  ElMessage({
+    message: data,
+    type: 'error',
+  })
 }
 </script>
 

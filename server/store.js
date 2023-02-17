@@ -70,7 +70,6 @@ const user = {
     const queryUsersMessage = Bmob.Query('user_message')
     queryUsersMessage.set('users', roomName)
     let res = await queryUsersMessage.save()
-    console.log(res)
     if (res.objectId) return true
   },
 }

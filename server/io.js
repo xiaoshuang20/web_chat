@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
   // > 消息区域
   socket.on('getHistoryMessage', async (data) => {
     let message = await api.getHistoryMessage(data)
-    io.emit('getHistoryMessage1', message)
+    if (message) io.emit('getHistoryMessage1', message)
   })
 
   socket.on('sendMessage', async (name, data) => {

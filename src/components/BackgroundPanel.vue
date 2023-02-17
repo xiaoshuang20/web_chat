@@ -5,7 +5,7 @@
         v-for="(msg, index) in props.message"
         :key="index"
         :isSend="msg.from?.name === props.currentUser"
-        :content="msg.content"
+        :msg="msg"
       />
     </div>
     <div class="write">

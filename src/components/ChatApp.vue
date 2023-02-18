@@ -216,6 +216,7 @@ const sendMessageFail = (data) => {
     message: data,
     type: 'error',
   })
+  // 发送失败的标志（操作 message 最后一个元素，加上标记 send_fail）
 }
 </script>
 

@@ -25,7 +25,7 @@ const user = {
       queryUsers.set('password', data.password)
       queryUsers.set('type', 'user')
       queryUsers.set('avatarUrl', '/img/avatar.jpg')
-      queryUsers.set('roomID', data.id)
+      // queryUsers.set('roomID', data.id)
       queryUsers.set('signature', '这里什么也没有哦~')
       let res = await queryUsers.save()
       return res
@@ -87,18 +87,18 @@ const message = {
     let res = await this.uitl(name)
     if (res.length === 0) {
       // xiao-test 和 test-xiao 消息记录是一样的
-      const arr = name.split('-')
-      res = await this.uitl(arr.reverse().join('-'))
+      const arr = name.split('_')
+      res = await this.uitl(arr.reverse().join('_'))
     }
     return res[0].message
   },
   // 发送信息
-  async sendMessage(name, msg) {
+  async saveMessage(name, msg) {
     const queryUsersMessage = Bmob.Query('user_message')
     let res = await this.uitl(name)
     if (res.length === 0) {
-      const arr = name.split('-')
-      res = await this.uitl(arr.reverse().join('-'))
+      const arr = name.split('_')
+      res = await this.uitl(arr.reverse().join('_'))
     }
     let res1 = await queryUsersMessage.get(res[0].objectId)
     res1.add('message', [msg])

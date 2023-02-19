@@ -99,7 +99,6 @@
 <script setup>
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
-import { computed } from 'vue'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
 
@@ -116,6 +115,7 @@ const initConnect = async () => {
   socket.on('addFriendsFail', addFriendsFail)
   socket.on('getHistoryMessageSuccess', changeMessage)
   socket.on('sendMessageFail', sendMessageFail)
+  socket.on('getMessage', getMessage)
 }
 
 /**
@@ -181,6 +181,7 @@ const handleClose = () => {
 // 切换聊天对象
 let current = ref() // 当前选中用户
 const changeCurrent = (index) => {
+  // if (current.value === index) return
   current.value = index
   targetUser.value = friends.value[index]
   getHistoryMessage()
@@ -205,7 +206,7 @@ const sendMessage = (msg) => {
     content: msg,
   }
   addMessage(body)
-  socket.emit('sendMessage', room.value, body)
+  socket.emit('sendMessage', roomName.value, body)
 }
 // 添加信息
 const addMessage = (msg) => {
@@ -216,7 +217,10 @@ const sendMessageFail = (data) => {
     message: data,
     type: 'error',
   })
-  // 发送失败的标志（操作 message 最后一个元素，加上标记 send_fail）
+}
+// 收到消息
+const getMessage = (msg) => {
+  console.log(msg, 'xiao')
 }
 </script>
 

@@ -12,7 +12,7 @@ io.on('connection', (socket) => {
 
   // > 用户区域
   socket.on('register', async (data) => {
-    let res = await api.register({ ...data, id: socket.id })
+    let res = await api.register(data)
     if (!res) {
       io.emit('registerFail')
     } else {
@@ -54,11 +54,14 @@ io.on('connection', (socket) => {
   })
 
   socket.on('sendMessage', async (name, data) => {
-    let res = await api.sendMessage(name, data)
-    if (!res) {
-      io.emit('sendMessageFail', '发送失败，请检查网络情况')
-      return
-    }
+    socket.broadcast.to(data.to.roomID).emit('getMessage', data)
+    // let res = await api.saveMessage(name, data)
+    // if (!res) {
+    //   io.emit('sendMessageFail', '发送失败，请检查网络情况')
+    //   return
+    // }
+    // 通知接收方
+    // console.log(data.to)
   })
 })
 

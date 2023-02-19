@@ -110,12 +110,18 @@ const initConnect = async () => {
   // 获取当前用户
   currentUser.value = JSON.parse(window.sessionStorage.getItem('current_user'))
   getAllFriend()
+  setRoomId()
   socket.on('getAllFriendSuccess', changeFriends)
+  socket.on('updateTargetSuccess', updateTarget)
   socket.on('addFriendsSuccess', addFriendsSuccess)
   socket.on('addFriendsFail', addFriendsFail)
   socket.on('getHistoryMessageSuccess', changeMessage)
   socket.on('sendMessageFail', sendMessageFail)
   socket.on('getMessage', getMessage)
+}
+
+const setRoomId = () => {
+  socket.emit('setRoomId', currentUser.value.objectId)
 }
 
 /**
@@ -180,18 +186,24 @@ const handleClose = () => {
 }
 // 切换聊天对象
 let current = ref() // 当前选中用户
-const changeCurrent = (index) => {
-  // if (current.value === index) return
+const changeCurrent = async (index) => {
+  if (current.value === index) return
   current.value = index
   targetUser.value = friends.value[index]
-  getHistoryMessage()
+  getHistoryMessage(targetUser.value.objectId)
+}
+// 更新聊天对象信息
+const updateTarget = (data) => {
+  targetUser.value.roomID = data.roomID
+  console.log(targetUser.value.roomID)
 }
 
 /**
  * > 消息区域
  */
-const getHistoryMessage = () => {
+const getHistoryMessage = (objectId) => {
   socket.emit('getHistoryMessage', roomName.value)
+  socket.emit('updateTarget', objectId)
 }
 let message = ref([]) // 历史记录
 const changeMessage = (data) => {
@@ -220,7 +232,7 @@ const sendMessageFail = (data) => {
 }
 // 收到消息
 const getMessage = (msg) => {
-  console.log(msg, 'xiao')
+  addMessage(msg)
 }
 </script>
 

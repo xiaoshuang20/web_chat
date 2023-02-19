@@ -47,6 +47,16 @@ io.on('connection', (socket) => {
     io.emit('addFriendsSuccess', res, '添加成功，快来一起聊天吧！')
   })
 
+  socket.on('setRoomId', async (id) => {
+    await api.setRoomId({ objectId: id, id: socket.id })
+  })
+
+  socket.on('updateTarget', async (id) => {
+    let res = await api.updateTarget(id)
+    // 只给当前 socket 更新
+    io.to(socket.id).emit('updateTargetSuccess', res)
+  })
+
   // > 消息区域
   socket.on('getHistoryMessage', async (data) => {
     let message = await api.getHistoryMessage(data)
@@ -54,14 +64,14 @@ io.on('connection', (socket) => {
   })
 
   socket.on('sendMessage', async (name, data) => {
-    socket.broadcast.to(data.to.roomID).emit('getMessage', data)
-    // let res = await api.saveMessage(name, data)
-    // if (!res) {
-    //   io.emit('sendMessageFail', '发送失败，请检查网络情况')
-    //   return
-    // }
     // 通知接收方
-    // console.log(data.to)
+    socket.broadcast.to(data.to.roomID).emit('getMessage', data)
+    // 持久化存储
+    let res = await api.saveMessage(name, data)
+    if (!res) {
+      io.emit('sendMessageFail', '发送失败，请检查网络情况')
+      return
+    }
   })
 })
 

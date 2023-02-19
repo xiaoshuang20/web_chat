@@ -74,10 +74,7 @@ const register = async () => {
   socket.emit('register', body.value)
 }
 const registerSuccess = (data) => {
-  window.sessionStorage.setItem(
-    'current_user',
-    JSON.stringify({ ...body.value, objectId: data.objectId })
-  )
+  window.sessionStorage.setItem('current_user', JSON.stringify(data))
   message.success('注册成功')
   router.push('/chat')
   loading.value = false

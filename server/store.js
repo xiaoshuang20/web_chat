@@ -28,10 +28,17 @@ const user = {
       // queryUsers.set('roomID', data.id)
       queryUsers.set('signature', '这里什么也没有哦~')
       let res = await queryUsers.save()
-      return res
+      let result = await this.getUserMsg(res.objectId)
+      return result
     } else {
       return false
     }
+  },
+  // 获取用户全部信息
+  async getUserMsg(id) {
+    const queryUsers = Bmob.Query('users')
+    let res = await queryUsers.get(id)
+    return res
   },
 
   // 获取所有好友
@@ -71,6 +78,20 @@ const user = {
     queryUsersMessage.set('users', roomName)
     let res = await queryUsersMessage.save()
     if (res.objectId) return true
+  },
+
+  // 设置 roomID
+  async setRoomId(data) {
+    const queryUsers = Bmob.Query('users')
+    let res = await queryUsers.get(data.objectId)
+    res.set('roomID', data.id)
+    res.save()
+  },
+
+  // 更新 target 对象
+  async updateTarget(id) {
+    let res = await this.getUserMsg(id)
+    return res
   },
 }
 

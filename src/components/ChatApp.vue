@@ -19,7 +19,11 @@
     <div class="container">
       <div class="aside">
         <div class="search">
-          <el-input placeholder="搜索">
+          <el-input
+            placeholder="搜索"
+            v-model="searchKey"
+            @keydown.enter="searchFriend"
+          >
             <template #prefix>
               <Epsearch />
             </template>
@@ -112,7 +116,6 @@ const initConnect = async () => {
   getAllFriend()
   setRoomId()
   socket.on('getAllFriendSuccess', changeFriends)
-  socket.on('updateTargetSuccess', updateTargetSuccess)
   socket.on('addFriendsSuccess', addFriendsSuccess)
   socket.on('addFriendsFail', addFriendsFail)
   socket.on('getHistoryMessageSuccess', changeMessage)
@@ -133,26 +136,28 @@ const roomName = computed(() => {
   return `${currentUser.value?.name}_${targetUser.value?.name}`
 })
 // 获取所有好友
+const allFriends = ref(null) // 所有好友列表（缓存）
 const friends = ref(null) // 好友列表
 const getAllFriend = () => {
   socket.emit('getAllFriend', currentUser.value.objectId)
 }
 const changeFriends = (data) => {
-  if (flag.value && data.length !== 0) {
+  if (data.length !== 0) {
+    allFriends.value = data
     friends.value = data
-    setFlag()
   }
-}
-// 避免不同页面之间的刷新互相影响
-const flag = ref(true)
-const setFlag = () => {
-  flag.value = false
 }
 // 添加好友
 let dialogVisible = ref(false)
 let addName = ref('')
 const addFriend = () => {
-  if (addName.value === '') return
+  if (addName.value === '') {
+    ElMessage({
+      message: '输入用户昵称才能搜索哦',
+      type: 'warning',
+    })
+    return
+  }
   socket.emit(
     'addFriends',
     addName.value,
@@ -163,8 +168,10 @@ const addFriend = () => {
 const addFriendsSuccess = (data, msg) => {
   // 直接将添加的好友 push到好友数组，不需要发起获取好友请求
   if (!friends.value) {
+    allFriends.value = [data]
     friends.value = [data]
   } else {
+    allFriends.value.push(data)
     friends.value.push(data)
   }
   ElMessage({
@@ -190,22 +197,24 @@ const changeCurrent = async (index) => {
   if (current.value === index) return
   current.value = index
   targetUser.value = friends.value[index]
+  message.value = []
   getHistoryMessage()
-  updateTarget(targetUser.value.objectId)
 }
-// 更新聊天对象信息（对方登录后自带的房间 ID 值会变，需要实时更新）
-const updateTarget = (objectId) => {
-  socket.emit('updateTarget', objectId)
-}
-const updateTargetSuccess = (data) => {
-  targetUser.value.roomID = data.roomID
-  console.log(targetUser.value.roomID)
+// 搜索好友
+let searchKey = ref('')
+const searchFriend = () => {
+  if (searchKey.value === '') {
+    friends.value = [...allFriends.value]
+  }
+  friends.value = allFriends.value.filter((item) => {
+    return item.name.includes(searchKey.value)
+  })
 }
 
 /**
  * > 消息区域
  */
-const getHistoryMessage = (objectId) => {
+const getHistoryMessage = () => {
   socket.emit('getHistoryMessage', roomName.value)
 }
 let message = ref([]) // 历史记录
@@ -216,7 +225,6 @@ const changeMessage = (data) => {
 // 发送信息
 const sendMessage = (msg) => {
   // 发信息前对面的老6刷新了怎么办
-  // updateTarget(targetUser.value.objectId)
   let body = {
     from: currentUser.value,
     to: targetUser.value,

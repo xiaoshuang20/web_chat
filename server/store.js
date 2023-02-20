@@ -113,6 +113,7 @@ const message = {
     }
     return res[0].message
   },
+
   // 发送信息
   async saveMessage(name, msg) {
     const queryUsersMessage = Bmob.Query('user_message')

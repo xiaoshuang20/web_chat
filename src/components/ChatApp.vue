@@ -44,7 +44,13 @@
             </div>
             <div class="center">
               <span>{{ user.name }}</span>
-              <p>hello, 这是一段测试信息，测试多余文字溢出</p>
+              <p>
+                {{
+                  historyMsg[`to_${user.name}`][
+                    historyMsg[`to_${user.name}`].length - 1
+                  ].content
+                }}
+              </p>
             </div>
             <div class="right">
               <span>{{ user.updatedAt.slice(11, 16) }}</span>
@@ -115,10 +121,9 @@ const initConnect = async () => {
   currentUser.value = JSON.parse(window.sessionStorage.getItem('current_user'))
   getAllFriend()
   setRoomId()
-  socket.on('getAllFriendSuccess', changeFriends)
+  socket.on('getAllFriendSuccess', changeFriendsList)
   socket.on('addFriendsSuccess', addFriendsSuccess)
   socket.on('addFriendsFail', addFriendsFail)
-  socket.on('getHistoryMessageSuccess', changeMessage)
   socket.on('sendMessageFail', sendMessageFail)
   socket.on('getMessage', getMessage)
 }
@@ -131,6 +136,7 @@ const setRoomId = () => {
  * > 用户区域
  */
 let currentUser = ref(null)
+let historyMsg = ref({})
 let targetUser = ref(null)
 const roomName = computed(() => {
   return `${currentUser.value?.name}_${targetUser.value?.name}`
@@ -139,12 +145,16 @@ const roomName = computed(() => {
 const allFriends = ref(null) // 所有好友列表（缓存）
 const friends = ref(null) // 好友列表
 const getAllFriend = () => {
-  socket.emit('getAllFriend', currentUser.value.objectId)
+  socket.emit('getAllFriend', currentUser.value)
 }
-const changeFriends = (data) => {
+const changeFriendsList = (data, msg) => {
   if (data.length !== 0) {
     allFriends.value = data
     friends.value = data
+    // 同时记录历史信息
+    data.forEach((item, index) => {
+      historyMsg.value[`to_${item.name}`] = msg[index]
+    })
   }
 }
 // 添加好友
@@ -197,8 +207,7 @@ const changeCurrent = async (index) => {
   if (current.value === index) return
   current.value = index
   targetUser.value = friends.value[index]
-  message.value = []
-  getHistoryMessage()
+  message.value = [...historyMsg.value[`to_${targetUser.value.name}`]]
 }
 // 搜索好友
 let searchKey = ref('')
@@ -214,17 +223,11 @@ const searchFriend = () => {
 /**
  * > 消息区域
  */
-const getHistoryMessage = () => {
-  socket.emit('getHistoryMessage', roomName.value)
-}
 let message = ref([]) // 历史记录
-const changeMessage = (data) => {
-  if (data) message.value = data
-}
 
 // 发送信息
 const sendMessage = (msg) => {
-  // 发信息前对面的老6刷新了怎么办
+  // 发信息前对面的老6刷新了怎么办(已解决)
   let body = {
     from: currentUser.value,
     to: targetUser.value,
@@ -236,6 +239,8 @@ const sendMessage = (msg) => {
 // 添加信息
 const addMessage = (msg) => {
   message.value.push(msg)
+  // 保证侧边栏展示的是最后一条历史信息
+  historyMsg.value[`to_${targetUser.value.name}`].push(msg)
 }
 const sendMessageFail = (data) => {
   ElMessage({

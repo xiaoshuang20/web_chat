@@ -30,7 +30,7 @@ Bmob.initialize('bc82f997576ffeca', 'xiao')
 
 const query = Bmob.Query('user_message')
 query
-  .get('d616f93dae')
+  .get('34c217e66d')
   .then((res) => {
     res.unset('message')
     res.save()

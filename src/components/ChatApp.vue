@@ -46,16 +46,27 @@
               <span>{{ user.name }}</span>
               <p>
                 {{
-                  historyMsg[`to_${user.name}`][
-                    historyMsg[`to_${user.name}`].length - 1
-                  ].content
+                  historyMsg[`to_${user.name}`]
+                    ? historyMsg[`to_${user.name}`][
+                        historyMsg[`to_${user.name}`].length - 1
+                      ].content
+                    : '已添加好友'
                 }}
               </p>
             </div>
             <div class="right">
-              <span>{{ user.updatedAt.slice(11, 16) }}</span>
-              <div class="msg_unread">
-                <p>1</p>
+              <span>{{
+                historyMsg[`to_${user.name}`]
+                  ? historyMsg[`to_${user.name}`][
+                      historyMsg[`to_${user.name}`].length - 1
+                    ].currentTime.slice(11, 16)
+                  : user.updatedAt.slice(11, 16)
+              }}</span>
+              <div
+                class="msg_unread_box"
+                :class="{ has_unread: true, much_msg: true }"
+              >
+                <p class="msg_unread" v-show="true">99+</p>
               </div>
             </div>
           </li>
@@ -109,6 +120,7 @@
 <script setup>
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
+import { getCurrentTime } from '../utils'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
 
@@ -207,7 +219,9 @@ const changeCurrent = async (index) => {
   if (current.value === index) return
   current.value = index
   targetUser.value = friends.value[index]
-  message.value = [...historyMsg.value[`to_${targetUser.value.name}`]]
+  message.value = historyMsg.value[`to_${targetUser.value.name}`]
+    ? [...historyMsg.value[`to_${targetUser.value.name}`]]
+    : []
 }
 // 搜索好友
 let searchKey = ref('')
@@ -232,6 +246,7 @@ const sendMessage = (msg) => {
     from: currentUser.value,
     to: targetUser.value,
     content: msg,
+    currentTime: getCurrentTime(),
   }
   addMessage(body)
   socket.emit('sendMessage', roomName.value, body)
@@ -240,7 +255,11 @@ const sendMessage = (msg) => {
 const addMessage = (msg) => {
   message.value.push(msg)
   // 保证侧边栏展示的是最后一条历史信息
-  historyMsg.value[`to_${targetUser.value.name}`].push(msg)
+  if (historyMsg.value[`to_${targetUser.value.name}`]) {
+    historyMsg.value[`to_${targetUser.value.name}`].push(msg)
+  } else {
+    historyMsg.value[`to_${targetUser.value.name}`] = [msg]
+  }
 }
 const sendMessageFail = (data) => {
   ElMessage({
@@ -406,21 +425,31 @@ const getMessage = (msg) => {
               color: #6d7576;
             }
 
-            .msg_unread {
+            .msg_unread_box {
               margin-top: 5px;
-              //   消息数超过两位数时变宽度
-              //   width: 25px;
               width: 20px;
               height: 20px;
               border-radius: 50%;
               text-align: center;
               line-height: 20px;
-              background-color: #fe5438;
 
               p {
                 color: white;
                 font-size: 12px;
               }
+            }
+
+            .has_unread {
+              background-color: #fe5438;
+            }
+
+            // 消息数超过两位数时变宽度
+            .much_msg {
+              width: 28px;
+              border-top-left-radius: 10px;
+              border-top-right-radius: 10px;
+              border-bottom-left-radius: 10px;
+              border-bottom-right-radius: 10px;
             }
           }
 

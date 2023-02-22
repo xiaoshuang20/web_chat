@@ -10,7 +10,20 @@
     </div>
     <div class="write">
       <div class="emoji">
-        <span class="iconfont icon-expression"></span>
+        <ul>
+          <el-popover
+            v-for="(item, index) in icons"
+            :key="index"
+            placement="bottom-start"
+            trigger="hover"
+            :content="item.tip"
+            :hide-after="0"
+          >
+            <template #reference>
+              <li class="iconfont" :class="[item.icon]"></li>
+            </template>
+          </el-popover>
+        </ul>
       </div>
       <div class="text">
         <el-input
@@ -47,6 +60,20 @@ const sendMessage = () => {
     message.value = ''
   }, 0)
 }
+
+// 系列功能
+let icons = ref([
+  {
+    type: 'smile',
+    icon: 'icon-smile',
+    tip: '表情',
+  },
+  {
+    type: 'history',
+    icon: 'icon-history',
+    tip: '显示消息记录',
+  },
+])
 </script>
 
 <style scoped lang="less">
@@ -69,20 +96,25 @@ const sendMessage = () => {
     .emoji {
       box-sizing: border-box;
       height: 20%;
-      padding: 2px 5px;
 
-      span {
-        width: 35px;
-        height: 100%;
+      ul {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-left: 8px;
-        font-size: 20px;
+        padding: 5px 5px;
 
-        &:hover {
-          cursor: pointer;
-          background-color: #d9eaec;
+        li {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 30px;
+          height: 30px;
+          margin-left: 6px;
+          font-size: 20px;
+          opacity: 0.7;
+
+          &:hover {
+            cursor: pointer;
+            background-color: #d9eaec;
+          }
         }
       }
     }

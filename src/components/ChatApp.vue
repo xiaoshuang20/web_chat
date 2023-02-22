@@ -57,10 +57,12 @@
             <div class="right">
               <span>{{
                 historyMsg[`to_${user.name}`]
-                  ? historyMsg[`to_${user.name}`][
-                      historyMsg[`to_${user.name}`].length - 1
-                    ].currentTime.slice(11, 16)
-                  : user.updatedAt.slice(11, 16)
+                  ? expressTime(
+                      historyMsg[`to_${user.name}`][
+                        historyMsg[`to_${user.name}`].length - 1
+                      ].currentTime
+                    )
+                  : expressTime(user.updatedAt)
               }}</span>
               <div
                 class="msg_unread_box"
@@ -73,7 +75,21 @@
         </ul>
         <p v-else class="no_friends">还没有好友哦!</p>
         <div class="footer">
-          进阶功能（我的/好友请求/气泡样式/历史记录/创建房间）
+          <!-- 进阶功能（我的/好友请求/气泡样式/创建房间） -->
+          <ul>
+            <li>
+              <el-popover
+                placement="top-start"
+                trigger="hover"
+                content="this is content, this is content, this is content"
+                :hide-after="0"
+              >
+                <template #reference>
+                  <el-button class="expand"><Epuser /></el-button>
+                </template>
+              </el-popover>
+            </li>
+          </ul>
         </div>
       </div>
       <BackgroundPanel
@@ -120,7 +136,7 @@
 <script setup>
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
-import { getCurrentTime } from '../utils'
+import { getCurrentTime, expressTime } from '../utils'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
 
@@ -153,6 +169,7 @@ let targetUser = ref(null)
 const roomName = computed(() => {
   return `${currentUser.value?.name}_${targetUser.value?.name}`
 })
+
 // 获取所有好友
 const allFriends = ref(null) // 所有好友列表（缓存）
 const friends = ref(null) // 好友列表
@@ -169,6 +186,7 @@ const changeFriendsList = (data, msg) => {
     })
   }
 }
+
 // 添加好友
 let dialogVisible = ref(false)
 let addName = ref('')
@@ -213,6 +231,7 @@ const handleClose = () => {
   dialogVisible.value = false
   addName.value = ''
 }
+
 // 切换聊天对象
 let current = ref() // 当前选中用户
 const changeCurrent = async (index) => {
@@ -223,6 +242,7 @@ const changeCurrent = async (index) => {
     ? [...historyMsg.value[`to_${targetUser.value.name}`]]
     : []
 }
+
 // 搜索好友
 let searchKey = ref('')
 const searchFriend = () => {
@@ -233,6 +253,8 @@ const searchFriend = () => {
     return item.name.includes(searchKey.value)
   })
 }
+
+// 系列扩展 (我想弄配置来着，但icon设置了自动导入，无法遍历)
 
 /**
  * > 消息区域

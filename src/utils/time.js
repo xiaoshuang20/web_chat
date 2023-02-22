@@ -1,4 +1,13 @@
 const time = new Date()
+const week = [
+  '星期天',
+  '星期一',
+  '星期二',
+  '星期三',
+  '星期四',
+  '星期五',
+  '星期六',
+]
 
 export function getCurrentTime() {
   let year = time.getFullYear()
@@ -24,4 +33,19 @@ export function getCurrentTime() {
     ':' +
     seconds
   return current
+}
+
+export function expressTime(date) {
+  let currentTime = time.getTime()
+  let lastTime = new Date(date).getTime()
+  let gap = (currentTime - lastTime) / 1000 / 60 / 60
+  if (gap < 24) {
+    return date.slice(11, 16)
+  } else if (gap < 48) {
+    return '昨天'
+  } else if (gap < 72) {
+    return '前天'
+  } else {
+    return week[time.getDay()]
+  }
 }

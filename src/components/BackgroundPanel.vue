@@ -20,7 +20,11 @@
             :hide-after="0"
           >
             <template #reference>
-              <li class="iconfont" :class="[item.icon]"></li>
+              <li
+                @click="handleExpand(item)"
+                class="iconfont"
+                :class="[item.icon]"
+              ></li>
             </template>
           </el-popover>
         </ul>
@@ -74,6 +78,11 @@ let icons = ref([
     tip: '显示消息记录',
   },
 ])
+const handleExpand = (data) => {
+  console.log(data.type)
+  switch (data.type) {
+  }
+}
 </script>
 
 <style scoped lang="less">

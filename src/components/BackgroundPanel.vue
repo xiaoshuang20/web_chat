@@ -81,6 +81,11 @@ let icons = ref([
 const handleExpand = (data) => {
   console.log(data.type)
   switch (data.type) {
+    case 'emoji':
+      break
+
+    default:
+      break
   }
 }
 </script>

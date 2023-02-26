@@ -9,7 +9,7 @@
       />
     </div>
     <div class="write">
-      <div class="emoji">
+      <div class="expand">
         <ul>
           <el-popover
             v-for="(item, index) in icons"
@@ -18,6 +18,7 @@
             trigger="hover"
             :content="item.tip"
             :hide-after="0"
+            :show-after="500"
           >
             <template #reference>
               <li
@@ -42,12 +43,26 @@
           <EpPromotion class="icon" />
         </el-button>
       </div>
+      <Transition name="emoji">
+        <el-card class="emoji" v-show="isShowEmoji">
+          <ul class="expression-list">
+            <li
+              v-for="item in expressions"
+              :key="item.title"
+              @click="chooseEmoji(item.title)"
+            >
+              <img :src="getAssetsFile(item.url)" alt="" />
+            </li>
+          </ul>
+        </el-card>
+      </Transition>
     </div>
   </div>
 </template>
 
 <script setup>
 import BubbleFrame from './BubbleFrame.vue'
+import { expressions, getAssetsFile } from '@/utils'
 
 let props = defineProps(['message', 'currentUser'])
 let emits = defineEmits(['sendMessage'])
@@ -68,7 +83,7 @@ const sendMessage = () => {
 // 系列功能
 let icons = ref([
   {
-    type: 'smile',
+    type: 'emoji',
     icon: 'icon-smile',
     tip: '表情',
   },
@@ -79,14 +94,23 @@ let icons = ref([
   },
 ])
 const handleExpand = (data) => {
-  console.log(data.type)
   switch (data.type) {
     case 'emoji':
+      handleEmoji()
       break
 
     default:
       break
   }
+}
+// 表情栏
+let isShowEmoji = ref(false)
+const handleEmoji = () => {
+  isShowEmoji.value = !isShowEmoji.value
+}
+const chooseEmoji = (data) => {
+  message.value += data
+  isShowEmoji.value = false
 }
 </script>
 
@@ -107,7 +131,7 @@ const handleExpand = (data) => {
     height: 35%;
     border-top: 1px solid #d5e6e8;
 
-    .emoji {
+    .expand {
       box-sizing: border-box;
       height: 20%;
 
@@ -181,6 +205,82 @@ const handleExpand = (data) => {
           margin-left: 3px;
         }
       }
+    }
+
+    .emoji {
+      position: absolute;
+      top: -225px;
+      width: 346px;
+
+      :deep(.el-card__body) {
+        padding: 10px 0;
+        padding-right: 8px;
+        height: 200px;
+        overflow-y: hidden;
+
+        &:hover {
+          overflow-y: auto;
+          padding-right: 0;
+        }
+
+        &::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          border-top-left-radius: 5px;
+          border-top-right-radius: 5px;
+          border-bottom-left-radius: 5px;
+          border-bottom-right-radius: 5px;
+          background-color: #cdcdcd;
+        }
+
+        &::-webkit-scrollbar-track {
+          background-color: transparent;
+        }
+
+        ul {
+          list-style: none;
+          padding: 0 5px;
+          margin-left: 8px;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: flex-start;
+
+          li {
+            width: 30px;
+            height: 30px;
+            padding: 5px;
+
+            &:hover {
+              background-color: #f3f3f4;
+            }
+
+            img {
+              display: block;
+              width: 100%;
+              height: 100%;
+            }
+          }
+        }
+      }
+    }
+
+    .emoji-enter-from,
+    .emoji-leave-to {
+      opacity: 0;
+      top: -245px;
+    }
+
+    .emoji-enter-to,
+    .emoji-leave-from {
+      opacity: 1;
+      top: -225px;
+    }
+
+    .emoji-enter-active,
+    .emoji-leave-active {
+      transition: all 0.5s ease;
     }
   }
 }

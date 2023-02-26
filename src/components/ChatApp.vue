@@ -68,7 +68,8 @@
                 class="msg_unread_box"
                 :class="{ has_unread: true, much_msg: true }"
               >
-                <p class="msg_unread" v-show="true">99+</p>
+                <p class="msg_unread" v-show="true">99</p>
+                <span>+</span>
               </div>
             </div>
           </li>
@@ -448,16 +449,21 @@ const getMessage = (msg) => {
             }
 
             .msg_unread_box {
+              display: flex;
+              justify-content: center;
+              align-items: center;
               margin-top: 5px;
               width: 20px;
               height: 20px;
               border-radius: 50%;
-              text-align: center;
-              line-height: 20px;
 
               p {
                 color: white;
                 font-size: 12px;
+              }
+
+              span {
+                color: #fff;
               }
             }
 

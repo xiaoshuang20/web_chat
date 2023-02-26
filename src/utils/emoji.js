@@ -164,8 +164,6 @@ export function renderEmoji(text) {
   // 使用正则匹配到关键字
   const reg = /\[.*?\]/g
   let arr = keyword(reg, text)
-  console.log(arr)
-  console.log(getAssetsFile(emojiMap['[惊恐]']))
   if (arr.length === 0) return h('div', text)
   return h(
     'div',

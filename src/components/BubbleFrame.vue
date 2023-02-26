@@ -39,7 +39,6 @@ let props = defineProps(['isSend', 'msg'])
   margin-top: 14px;
   display: flex;
   align-items: center;
-  //   background-color: pink;
 
   .chat-bubble-avatar {
     padding-left: 10px;

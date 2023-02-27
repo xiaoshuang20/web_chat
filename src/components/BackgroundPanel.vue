@@ -98,7 +98,8 @@ const handleExpand = (data) => {
     case 'emoji':
       handleEmoji()
       break
-
+    case 'history':
+      break
     default:
       break
   }

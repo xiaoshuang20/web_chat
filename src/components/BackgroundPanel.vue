@@ -30,6 +30,7 @@
           </el-popover>
         </ul>
       </div>
+      <!-- contenteditable -->
       <div class="text">
         <el-input
           type="textarea"
@@ -113,6 +114,7 @@ const chooseEmoji = (data) => {
   message.value += data
   isShowEmoji.value = false
 }
+// 历史记录（待定）
 </script>
 
 <style scoped lang="less">

@@ -187,7 +187,6 @@ const changeFriendsList = (data, msg) => {
     })
   }
 }
-
 // 添加好友
 let dialogVisible = ref(false)
 let addName = ref('')
@@ -232,7 +231,6 @@ const handleClose = () => {
   dialogVisible.value = false
   addName.value = ''
 }
-
 // 切换聊天对象
 let current = ref() // 当前选中用户
 const changeCurrent = async (index) => {
@@ -243,7 +241,6 @@ const changeCurrent = async (index) => {
     ? [...historyMsg.value[`to_${targetUser.value.name}`]]
     : []
 }
-
 // 搜索好友
 let searchKey = ref('')
 const searchFriend = () => {
@@ -254,8 +251,7 @@ const searchFriend = () => {
     return item.name.includes(searchKey.value)
   })
 }
-
-// 系列扩展 (我想弄配置来着，但icon设置了自动导入，无法遍历)
+// 未读消息
 
 /**
  * > 消息区域

@@ -252,6 +252,7 @@ const searchFriend = () => {
   })
 }
 // 未读消息
+let showUnread = ref(false)
 
 /**
  * > 消息区域

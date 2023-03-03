@@ -50,7 +50,7 @@
             <li
               v-for="item in expressions"
               :key="item.title"
-              @click="chooseEmoji(item.title)"
+              @click.stop="chooseEmoji(item.title)"
             >
               <img :src="getAssetsFile(item.url)" alt="" />
             </li>
@@ -109,10 +109,19 @@ const handleExpand = (data) => {
 let isShowEmoji = ref(false)
 const handleEmoji = () => {
   isShowEmoji.value = !isShowEmoji.value
+  if (isShowEmoji.value) {
+    document.addEventListener('click', closeEmojiCard, true)
+  }
 }
+// 选择表情
 const chooseEmoji = (data) => {
   message.value += data
+  closeEmojiCard()
+}
+// 关闭表情卡片
+const closeEmojiCard = (e) => {
   isShowEmoji.value = false
+  document.removeEventListener('click', closeEmojiCard)
 }
 // 历史记录（待定）
 </script>

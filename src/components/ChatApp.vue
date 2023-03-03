@@ -64,12 +64,11 @@
                     )
                   : expressTime(user.updatedAt)
               }}</span>
-              <div
-                class="msg_unread_box"
-                :class="{ has_unread: true, much_msg: true }"
-              >
-                <p class="msg_unread" v-show="true">99</p>
-                <span>+</span>
+              <div class="msg_unread_box">
+                <div v-show="showUnread" :class="{ much_msg: muchUnread }">
+                  <p>99</p>
+                  <span v-if="muchUnread">+</span>
+                </div>
               </div>
             </div>
           </li>
@@ -252,7 +251,8 @@ const searchFriend = () => {
   })
 }
 // 未读消息
-let showUnread = ref(false)
+let showUnread = ref(true)
+let muchUnread = ref(true)
 
 /**
  * > 消息区域
@@ -446,13 +446,19 @@ const getMessage = (msg) => {
             }
 
             .msg_unread_box {
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              margin-top: 5px;
               width: 20px;
               height: 20px;
-              border-radius: 50%;
+
+              div {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: 5px;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background-color: #fe5438;
+              }
 
               p {
                 color: white;
@@ -461,20 +467,17 @@ const getMessage = (msg) => {
 
               span {
                 color: #fff;
+                margin-bottom: 3px;
               }
-            }
-
-            .has_unread {
-              background-color: #fe5438;
             }
 
             // 消息数超过两位数时变宽度
             .much_msg {
-              width: 28px;
-              border-top-left-radius: 10px;
-              border-top-right-radius: 10px;
-              border-bottom-left-radius: 10px;
-              border-bottom-right-radius: 10px;
+              width: 28px !important;
+              border-top-left-radius: 10px !important;
+              border-top-right-radius: 10px !important;
+              border-bottom-left-radius: 10px !important;
+              border-bottom-right-radius: 10px !important;
             }
           }
 

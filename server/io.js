@@ -65,14 +65,19 @@ io.on('connection', (socket) => {
   socket.on('sendMessage', async (name, data) => {
     // 更新聊天对象信息（对方登录后自带的房间 ID 值会变，需要实时更新）
     let res1 = await api.updateTarget(data.to.objectId)
-    // 通知接收方
-    socket.broadcast.to(res1.roomID).emit('getMessage', data)
-    // 持久化存储
+    // 持久化存储(需要先存储，否则后续接收方修改消息未读状态时查询不到完整消息记录)
     let res2 = await api.saveMessage(name, data)
     if (!res2) {
       io.to(socket.id).emit('sendMessageFail', '发送失败，请检查网络情况')
       return
     }
+    // 通知接收方
+    socket.broadcast.to(res1.roomID).emit('getMessage', data)
+  })
+
+  socket.on('changeReadStatus', async (msg) => {
+    let { from, to, currentTime } = msg
+    await api.changeReadStatus(`${from.name}_${to.name}`, currentTime)
   })
 })
 

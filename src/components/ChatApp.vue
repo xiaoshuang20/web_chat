@@ -65,9 +65,14 @@
                   : expressTime(user.updatedAt)
               }}</span>
               <div class="msg_unread_box">
-                <div v-show="showUnread" :class="{ much_msg: muchUnread }">
-                  <p>99</p>
-                  <span v-if="muchUnread">+</span>
+                <div
+                  v-show="unreadNum(user.name) !== -1"
+                  :class="{ much_msg: unreadNum(user.name) > 99 }"
+                >
+                  <p>
+                    {{ unreadNum(user.name) > 99 ? 99 : unreadNum(user.name) }}
+                  </p>
+                  <span v-if="unreadNum(user.name) > 99">+</span>
                 </div>
               </div>
             </div>
@@ -137,6 +142,7 @@
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
 import { getCurrentTime, expressTime } from '../utils'
+import { computed } from 'vue'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
 
@@ -250,15 +256,24 @@ const searchFriend = () => {
     return item.name.includes(searchKey.value)
   })
 }
-// 未读消息
-let showUnread = ref(true)
-let muchUnread = ref(true)
 
 /**
  * > 消息区域
  */
 let message = ref([]) // 历史记录
-
+// 未读消息
+let unreadNum = computed(() => (name) => {
+  let temp = historyMsg.value[`to_${name}`]
+  let num = 0
+  if (temp) {
+    temp.forEach((item) => {
+      if (item.from.name !== currentUser.value.name && !item.isRead) num++
+    })
+    return num ? num : -1
+  } else {
+    return -1
+  }
+})
 // 发送信息
 const sendMessage = (msg) => {
   // 发信息前对面的老6刷新了怎么办(已解决)
@@ -267,18 +282,25 @@ const sendMessage = (msg) => {
     to: targetUser.value,
     content: msg,
     currentTime: getCurrentTime(),
+    isRead: true,
   }
   addMessage(body)
+  // 保证侧边栏展示的是最后一条历史信息
+  if (historyMsg.value[`to_${targetUser.value.name}`]) {
+    historyMsg.value[`to_${targetUser.value.name}`].push(body)
+  } else {
+    historyMsg.value[`to_${targetUser.value.name}`] = [body]
+  }
   socket.emit('sendMessage', roomName.value, body)
 }
 // 添加信息
 const addMessage = (msg) => {
-  message.value.push(msg)
-  // 保证侧边栏展示的是最后一条历史信息
-  if (historyMsg.value[`to_${targetUser.value.name}`]) {
-    historyMsg.value[`to_${targetUser.value.name}`].push(msg)
-  } else {
-    historyMsg.value[`to_${targetUser.value.name}`] = [msg]
+  // 不能影响当前对话框
+  if (
+    msg.from.objectId === targetUser.value?.objectId ||
+    msg.from.objectId === currentUser.value.objectId
+  ) {
+    message.value.push(msg)
   }
 }
 const sendMessageFail = (data) => {
@@ -289,7 +311,17 @@ const sendMessageFail = (data) => {
 }
 // 收到消息
 const getMessage = (msg) => {
+  if (msg.from.objectId !== targetUser.value?.objectId) {
+    msg.isRead = false
+  }
   addMessage(msg)
+  socket.emit('changeReadStatus', msg)
+  // 保证侧边栏展示的是最后一条历史信息
+  if (historyMsg.value[`to_${msg.from.name}`]) {
+    historyMsg.value[`to_${msg.from.name}`].push(msg)
+  } else {
+    historyMsg.value[`to_${msg.from.name}`] = [msg]
+  }
 }
 </script>
 

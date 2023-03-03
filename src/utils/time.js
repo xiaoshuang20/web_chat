@@ -49,3 +49,7 @@ export function expressTime(date) {
     return week[time.getDay()]
   }
 }
+
+export function historyTime(date) {
+  return date.slice(5)
+}

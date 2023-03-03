@@ -8,8 +8,14 @@
     <div class="chat-bubble-avatar" v-if="!props.isSend">
       <el-avatar :size="40" :src="msg.to.avatarUrl" />
     </div>
-    <div class="chat-bubble-msg">
-      <div class="chat-bubble-time"></div>
+    <div
+      class="chat-bubble-msg"
+      @mouseenter="handleHover"
+      @mouseleave="handleLeave"
+    >
+      <p class="chat-bubble-time" v-show="showHistoryTime">
+        {{ historyTime(props.msg.currentTime) }}
+      </p>
       <div class="chat-bubble-text">
         <div
           :class="{
@@ -29,8 +35,22 @@
 
 <script setup>
 import ChatContent from './ChatContent.vue'
+import { historyTime } from '@/utils'
 
 let props = defineProps(['isSend', 'msg'])
+
+// 显示消息发送的时间
+let showHistoryTime = ref(false)
+let timer
+const handleHover = () => {
+  timer = setTimeout(() => {
+    showHistoryTime.value = true
+  }, 800)
+}
+const handleLeave = () => {
+  showHistoryTime.value = false
+  clearTimeout(timer)
+}
 </script>
 
 <style scoped lang="less">
@@ -43,6 +63,31 @@ let props = defineProps(['isSend', 'msg'])
   .chat-bubble-avatar {
     padding-left: 10px;
   }
+
+  .chat-bubble-msg {
+    .c_receive {
+      box-sizing: border-box;
+      position: relative;
+      height: 40px;
+      padding: 0 12px;
+      line-height: 40px;
+      margin-left: 12px;
+      margin-top: 5px;
+      border-radius: 7px;
+      background-color: #cedee0;
+
+      &::before {
+        content: '';
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        left: -7px;
+        top: 10px;
+        background-color: #cedee0;
+        clip-path: polygon(0 0, 100% 100%, 100% 20%);
+      }
+    }
+  }
 }
 
 .send {
@@ -51,57 +96,47 @@ let props = defineProps(['isSend', 'msg'])
   display: flex;
   align-items: center;
   justify-content: right;
-  //   background-color: pink;
 
   .chat-bubble-avatar {
     padding-right: 10px;
   }
-}
 
-.c_receive {
-  box-sizing: border-box;
-  position: relative;
-  height: 40px;
-  padding: 0 12px;
-  line-height: 40px;
-  margin-left: 12px;
-  margin-top: 5px;
-  border-radius: 7px;
-  background-color: #cedee0;
+  .chat-bubble-msg {
+    .c_send {
+      box-sizing: border-box;
+      position: relative;
+      height: 40px;
+      padding: 0 12px;
+      line-height: 40px;
+      margin-right: 12px;
+      margin-top: 5px;
+      border-radius: 7px;
+      color: #f7f9fd;
+      background-color: #12b7f5;
 
-  &::before {
-    content: '';
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    left: -7px;
-    top: 10px;
-    background-color: #cedee0;
-    clip-path: polygon(0 0, 100% 100%, 100% 20%);
+      &::before {
+        content: '';
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        right: -7px;
+        top: 10px;
+        background-color: #12b7f5;
+        clip-path: polygon(100% 0, 0 100%, 0 20%);
+      }
+    }
   }
 }
 
-.c_send {
-  box-sizing: border-box;
+.chat-bubble-msg {
   position: relative;
-  height: 40px;
-  padding: 0 12px;
-  line-height: 40px;
-  margin-right: 12px;
-  margin-top: 5px;
-  border-radius: 7px;
-  color: #f7f9fd;
-  background-color: #12b7f5;
-
-  &::before {
-    content: '';
+  .chat-bubble-time {
     position: absolute;
-    width: 8px;
-    height: 8px;
-    right: -7px;
-    top: 10px;
-    background-color: #12b7f5;
-    clip-path: polygon(100% 0, 0 100%, 0 20%);
+    top: -12px;
+    right: 10px;
+    white-space: nowrap;
+    font-size: 12px;
+    color: #a796b8;
   }
 }
 

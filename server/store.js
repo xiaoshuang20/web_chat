@@ -127,6 +127,25 @@ const message = {
     res1.save()
     return true
   },
+
+  // 标记消息未读状态
+  async changeReadStatus(name, targetTime) {
+    const queryUsersMessage = Bmob.Query('user_message')
+    let res = await this.uitl(name)
+    if (res.length === 0) {
+      const arr = name.split('_')
+      res = await this.uitl(arr.reverse().join('_'))
+    }
+
+    let message = res[0].message
+    let index = message.findIndex((item) => {
+      return item.currentTime === targetTime
+    })
+    message[index].isRead = false
+    let res1 = await queryUsersMessage.get(res[0].objectId)
+    res1.set('message', message)
+    res1.save()
+  },
 }
 
 export default {

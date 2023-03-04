@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <div class="window">
+    <div class="window" ref="window">
       <BubbleFrame
         v-for="(msg, index) in props.message"
         :key="index"
@@ -36,6 +36,7 @@
           type="textarea"
           v-model="message"
           @keydown.enter.stop="sendMessage"
+          ref="input"
         />
       </div>
       <div class="send">
@@ -80,6 +81,42 @@ const sendMessage = () => {
     message.value = ''
   }, 0)
 }
+
+// 窗口滚动条
+const isScroll = computed(() => (el) => {
+  if (el.scrollHeight > el.clientHeight) {
+    return true
+  } else {
+    return false
+  }
+})
+// 监听消息添加/输入事件
+let timer = null
+const input = ref()
+const window = ref()
+watch(
+  props.message,
+  () => {
+    console.log(window.value)
+    // if (isScroll.value(window.value)) {
+    //   window.value.setAttribute('_scroll', true)
+    // } else {
+    //   window.value.setAttribute('_scroll', false)
+    // }
+  }
+  // { immediate: true }
+)
+watch(message, () => {
+  clearTimeout(timer)
+  timer = setTimeout(() => {
+    // 这样会触发回流，但没办法，未出现滚动条时 hover 不能生效
+    if (isScroll.value(input.value.textarea)) {
+      input.value.textarea.setAttribute('_scroll', true)
+    } else {
+      input.value.textarea.setAttribute('_scroll', false)
+    }
+  }, 800)
+})
 
 // 系列功能
 let icons = ref([
@@ -132,10 +169,24 @@ const closeEmojiCard = (e) => {
   background-color: #e6f8fa;
 
   .window {
+    box-sizing: border-box;
     height: 65%;
     width: 100%;
-    overflow: auto;
+    padding-right: 10px;
+    overflow: hidden;
     background-color: #e6f8fa;
+
+    &[_scroll='true']:hover {
+      overflow: auto;
+      padding-right: 0;
+    }
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #c2d1d2;
+      border-radius: 8px;
+    }
   }
 
   .write {
@@ -179,12 +230,12 @@ const closeEmojiCard = (e) => {
           height: 100%;
           resize: none;
           box-shadow: none;
-          padding: 10px;
+          padding: 0 10px;
           color: #666666;
           background-color: transparent;
           line-height: 20px;
 
-          &:hover {
+          &[_scroll='true']:hover {
             overflow-y: auto;
             padding-right: 0;
           }

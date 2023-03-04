@@ -245,6 +245,7 @@ const changeCurrent = async (index) => {
   message.value = historyMsg.value[`to_${targetUser.value.name}`]
     ? [...historyMsg.value[`to_${targetUser.value.name}`]]
     : []
+  clearUnread(targetUser.value.name)
 }
 // 搜索好友
 let searchKey = ref('')
@@ -267,6 +268,7 @@ let unreadNum = computed(() => (name) => {
   let num = 0
   if (temp) {
     temp.forEach((item) => {
+      // 自己发送的消息不算未读
       if (item.from.name !== currentUser.value.name && !item.isRead) num++
     })
     return num ? num : -1
@@ -274,6 +276,17 @@ let unreadNum = computed(() => (name) => {
     return -1
   }
 })
+// 清除未读消息
+const clearUnread = (name) => {
+  if (unreadNum.value(name) !== -1) {
+    historyMsg.value[`to_${name}`].forEach((item, index) => {
+      if (!item.isRead) {
+        historyMsg.value[`to_${name}`][index].isRead = true
+      }
+    })
+    socket.emit('clearUnread', roomName.value)
+  }
+}
 // 发送信息
 const sendMessage = (msg) => {
   // 发信息前对面的老6刷新了怎么办(已解决)

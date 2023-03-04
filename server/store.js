@@ -146,6 +146,26 @@ const message = {
     res1.set('message', message)
     res1.save()
   },
+
+  // 清除未读消息
+  async clearUnread(name) {
+    const queryUsersMessage = Bmob.Query('user_message')
+    let res = await this.uitl(name)
+    if (res.length === 0) {
+      const arr = name.split('_')
+      res = await this.uitl(arr.reverse().join('_'))
+    }
+
+    let message = res[0].message
+    message.forEach((item, index) => {
+      if (!item.isRead) {
+        message[index].isRead = true
+      }
+    })
+    let res1 = await queryUsersMessage.get(res[0].objectId)
+    res1.set('message', message)
+    res1.save()
+  },
 }
 
 export default {

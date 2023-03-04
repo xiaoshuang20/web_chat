@@ -79,6 +79,10 @@ io.on('connection', (socket) => {
     let { from, to, currentTime } = msg
     await api.changeReadStatus(`${from.name}_${to.name}`, currentTime)
   })
+
+  socket.on('clearUnread', async (name) => {
+    await api.clearUnread(name)
+  })
 })
 
 export default io

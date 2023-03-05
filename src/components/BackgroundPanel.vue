@@ -98,13 +98,13 @@ watch(
   props.message,
   () => {
     console.log(window.value)
-    // if (isScroll.value(window.value)) {
-    //   window.value.setAttribute('_scroll', true)
-    // } else {
-    //   window.value.setAttribute('_scroll', false)
-    // }
+    if (isScroll.value(window.value)) {
+      window.value.setAttribute('_scroll', true)
+    } else {
+      window.value.setAttribute('_scroll', false)
+    }
   }
-  // { immediate: true }
+  { immediate: true }
 )
 watch(message, () => {
   clearTimeout(timer)

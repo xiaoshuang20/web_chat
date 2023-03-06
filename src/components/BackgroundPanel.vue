@@ -103,7 +103,7 @@ watch(
     } else {
       window.value.setAttribute('_scroll', false)
     }
-  }
+  },
   { immediate: true }
 )
 watch(message, () => {

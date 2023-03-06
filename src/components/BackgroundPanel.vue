@@ -94,18 +94,19 @@ const isScroll = computed(() => (el) => {
 let timer = null
 const input = ref()
 const window = ref()
-watch(
-  props.message,
-  () => {
-    console.log(window.value)
-    if (isScroll.value(window.value)) {
-      window.value.setAttribute('_scroll', true)
-    } else {
-      window.value.setAttribute('_scroll', false)
-    }
-  },
-  { immediate: true }
-)
+watchEffect(() => {
+  if (props.message && window.value) {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      // 这样会触发回流，但没办法，未出现滚动条时 hover 不能生效
+      if (isScroll.value(window.value)) {
+        window.value.setAttribute('_scroll', true)
+      } else {
+        window.value.setAttribute('_scroll', false)
+      }
+    }, 200)
+  }
+})
 watch(message, () => {
   clearTimeout(timer)
   timer = setTimeout(() => {

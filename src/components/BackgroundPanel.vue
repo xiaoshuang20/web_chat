@@ -182,6 +182,7 @@ const closeEmojiCard = (e) => {
     box-sizing: border-box;
     height: 65%;
     width: 100%;
+    padding-bottom: 12px;
     padding-right: 10px;
     overflow: hidden;
     background-color: #e6f8fa;
@@ -202,7 +203,6 @@ const closeEmojiCard = (e) => {
   .write {
     position: relative;
     height: 35%;
-    margin-top: 12px;
     border-top: 1px solid #d5e6e8;
 
     .expand {

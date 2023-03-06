@@ -65,6 +65,17 @@ const handleLeave = () => {
   }
 
   .chat-bubble-msg {
+    position: relative;
+
+    .chat-bubble-time {
+      position: absolute;
+      top: -12px;
+      left: 12px;
+      white-space: nowrap;
+      font-size: 12px;
+      color: #a796b8;
+    }
+
     .c_receive {
       box-sizing: border-box;
       position: relative;
@@ -102,6 +113,17 @@ const handleLeave = () => {
   }
 
   .chat-bubble-msg {
+    position: relative;
+
+    .chat-bubble-time {
+      position: absolute;
+      top: -12px;
+      right: 12px;
+      white-space: nowrap;
+      font-size: 12px;
+      color: #a796b8;
+    }
+
     .c_send {
       box-sizing: border-box;
       position: relative;
@@ -125,18 +147,6 @@ const handleLeave = () => {
         clip-path: polygon(100% 0, 0 100%, 0 20%);
       }
     }
-  }
-}
-
-.chat-bubble-msg {
-  position: relative;
-  .chat-bubble-time {
-    position: absolute;
-    top: -12px;
-    right: 10px;
-    white-space: nowrap;
-    font-size: 12px;
-    color: #a796b8;
   }
 }
 

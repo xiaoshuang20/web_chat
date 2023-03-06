@@ -80,6 +80,11 @@ const sendMessage = () => {
   setTimeout(() => {
     message.value = ''
   }, 0)
+
+  // 接收到新的消息时保持滚动条在最底部
+  nextTick(() => {
+    window.value.scrollTop = window.value.scrollHeight
+  })
 }
 
 // 窗口滚动条
@@ -95,6 +100,10 @@ let timer = null
 const input = ref()
 const window = ref()
 watchEffect(() => {
+  // 这里只会触发一次（疑惑：props.message变化监听不到？）
+  nextTick(() => {
+    window.value.scrollTop = window.value.scrollHeight
+  })
   if (props.message && window.value) {
     clearTimeout(timer)
     timer = setTimeout(() => {
@@ -193,6 +202,7 @@ const closeEmojiCard = (e) => {
   .write {
     position: relative;
     height: 35%;
+    margin-top: 12px;
     border-top: 1px solid #d5e6e8;
 
     .expand {

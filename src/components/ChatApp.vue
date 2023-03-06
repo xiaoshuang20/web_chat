@@ -36,7 +36,7 @@
           <li
             v-for="(user, index) in friends"
             :key="user.objectId"
-            @click="changeCurrent(index)"
+            @click="changeCurrent(user.name)"
             :class="{ active: current === index }"
           >
             <div class="left">
@@ -238,10 +238,12 @@ const handleClose = () => {
 }
 // 切换聊天对象
 let current = ref() // 当前选中用户
-const changeCurrent = async (index) => {
-  if (current.value === index) return
-  current.value = index
-  targetUser.value = friends.value[index]
+const changeCurrent = async (name) => {
+  if (current.value === name) return
+  current.value = name
+  targetUser.value = friends.value.find((item) => {
+    return item.name === name
+  })
   message.value = historyMsg.value[`to_${targetUser.value.name}`]
     ? [...historyMsg.value[`to_${targetUser.value.name}`]]
     : []

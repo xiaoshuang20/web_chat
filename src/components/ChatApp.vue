@@ -32,7 +32,7 @@
             <EpPlus />
           </el-button>
         </div>
-        <ul v-if="friends">
+        <ul v-if="friends" class="user">
           <li
             v-for="(user, index) in friends"
             :key="user.objectId"
@@ -81,19 +81,24 @@
         <p v-else class="no_friends">还没有好友哦!</p>
         <div class="footer">
           <!-- 进阶功能（我的/好友请求/气泡样式/创建房间） -->
-          <ul>
-            <li>
-              <el-popover
-                placement="top-start"
-                trigger="hover"
-                content="this is content, this is content, this is content"
-                :hide-after="0"
-              >
-                <template #reference>
-                  <el-button class="expand"><Epuser /></el-button>
-                </template>
-              </el-popover>
-            </li>
+          <ul class="expand">
+            <el-popover
+              v-for="(item, index) in expand"
+              :key="index"
+              placement="top-start"
+              trigger="hover"
+              :content="item.tip"
+              :hide-after="0"
+              :show-after="500"
+            >
+              <template #reference>
+                <li
+                  @click="handleExpand(item)"
+                  class="iconfont"
+                  :class="[item.icon]"
+                ></li>
+              </template>
+            </el-popover>
           </ul>
         </div>
       </div>
@@ -105,6 +110,26 @@
       />
       <div class="emptyUser" v-else>这里还什么也没有哦, 快去跟好友聊天吧！</div>
     </div>
+    <!-- 个人信息弹框 -->
+    <el-dialog
+      v-model="settingDialogVisible"
+      width="50%"
+      :modal="false"
+      draggable
+      @close-auto-focus="closeSetting"
+      @close="closeSetting"
+    >
+      <div class="bgc">
+        <div class="avatar">
+          <el-avatar :size="60" :src="getAssetsFile(currentUser.avatarUrl)" />
+          <div class="user_msg">
+            <p class="name">{{ currentUser.name }}</p>
+            <p class="signature">{{ currentUser.signature }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="msg"></div>
+    </el-dialog>
   </div>
   <el-dialog
     v-model="dialogVisible"
@@ -141,7 +166,7 @@
 <script setup>
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
-import { getCurrentTime, expressTime } from '../utils'
+import { getCurrentTime, expressTime, getAssetsFile } from '../utils'
 import { computed } from 'vue'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
@@ -338,13 +363,44 @@ const getMessage = (msg) => {
     historyMsg.value[`to_${msg.from.name}`] = [msg]
   }
 }
+
+/**
+ * > 扩展功能
+ */
+// 系列功能
+let expand = ref([
+  {
+    type: 'wordcloud',
+    icon: 'icon-chart-word-cloud',
+    tip: '生成词云',
+  },
+  {
+    type: 'setting',
+    icon: 'icon-setting',
+    tip: '个人设置',
+  },
+])
+const handleExpand = (data) => {
+  switch (data.type) {
+    case 'setting':
+      openSetting()
+  }
+}
+// 个人信息设置弹窗
+let settingDialogVisible = ref(false)
+const openSetting = () => {
+  settingDialogVisible.value = true
+}
+const closeSetting = () => {
+  settingDialogVisible.value = false
+}
 </script>
 
 <style scoped lang="less">
 .chat_window {
   position: absolute;
-  width: 900px;
-  height: 550px;
+  width: 1000px;
+  height: 600px;
 
   .header {
     width: 100%;
@@ -430,7 +486,7 @@ const getMessage = (msg) => {
         }
       }
 
-      ul {
+      .user {
         display: flex;
         flex-direction: column;
         margin-right: 1px;
@@ -554,7 +610,24 @@ const getMessage = (msg) => {
         bottom: 0;
         height: 30px;
         width: 100%;
-        background-color: pink;
+        border-top: 1px solid #d5e6e8;
+
+        .expand {
+          height: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          li {
+            font-size: 22px;
+            padding: 4px;
+
+            &:hover {
+              cursor: pointer;
+              background-color: #ddeef0;
+            }
+          }
+        }
       }
     }
 
@@ -567,6 +640,78 @@ const getMessage = (msg) => {
       width: 100%;
       color: #a8b2ca;
       background-color: #e6f8fa;
+    }
+  }
+
+  :deep(.el-dialog) {
+    position: relative;
+    padding: 0;
+    border-radius: 10px;
+
+    .el-dialog__header {
+      position: absolute;
+      margin: 0;
+      padding: 0;
+      height: 30px;
+      width: 100%;
+    }
+
+    .el-dialog__body {
+      display: flex;
+      padding: 0;
+
+      .bgc {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        flex: 1;
+        height: 400px;
+        background: url('/img/home.jpg') no-repeat center;
+        background-size: cover;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+
+        .avatar {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 30%;
+          border-bottom-left-radius: 10px;
+          background-color: rgba(112, 118, 135, 0.8);
+
+          .el-avatar {
+            transition: all 0.5s ease-in-out;
+
+            &:hover {
+              transform: rotate(360deg);
+            }
+          }
+
+          .user_msg {
+            margin-left: 12px;
+            color: #fff;
+            .name {
+              font-size: 26px;
+            }
+            .signature {
+              width: 120px;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              font-size: 12px;
+              opacity: 0.8;
+            }
+          }
+        }
+      }
+
+      .msg {
+        flex: 1;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        background-color: pink;
+      }
     }
   }
 }

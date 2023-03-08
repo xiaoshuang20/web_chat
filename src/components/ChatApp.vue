@@ -128,7 +128,27 @@
           </div>
         </div>
       </div>
-      <div class="msg"></div>
+      <div class="msg">
+        <div class="container">
+          <span class="edit">编辑资料</span>
+          <div class="id">
+            <span class="iconfont icon-zuanshi"></span>
+            <span>{{ currentUser.objectId }}</span>
+          </div>
+          <div class="user">
+            <span class="iconfont icon-user"></span>
+            <span>{{ currentUser.name }}</span>
+          </div>
+        </div>
+        <span class="line"></span>
+        <div class="signature">
+          <div class="head">
+            <span class="iconfont icon-signature"></span>
+            <span>个性签名</span>
+          </div>
+          <div class="content">{{ currentUser.signature }}</div>
+        </div>
+      </div>
     </el-dialog>
   </div>
   <el-dialog
@@ -684,6 +704,7 @@ const closeSetting = () => {
             transition: all 0.5s ease-in-out;
 
             &:hover {
+              cursor: pointer;
               transform: rotate(360deg);
             }
           }
@@ -710,7 +731,73 @@ const closeSetting = () => {
         flex: 1;
         border-top-right-radius: 10px;
         border-bottom-right-radius: 10px;
-        background-color: pink;
+        background-image: linear-gradient(to right bottom, #3ac5fc, #4afebf);
+
+        .container {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          height: 26%;
+          margin: 50px 24px 0px 24px;
+          border-radius: 12px;
+          background: linear-gradient(
+            to right bottom,
+            rgba(255, 255, 255, 0.6),
+            rgba(255, 255, 255, 0.3),
+            rgba(255, 255, 255, 0.2)
+          );
+          backdrop-filter: blur(11px);
+          border-top: 1px solid rgba(255, 255, 255, 0.8);
+          border-left: 1px solid rgba(255, 255, 255, 0.8);
+
+          .iconfont {
+            margin-left: 12px;
+            margin-right: 12px;
+            font-size: 20px;
+          }
+          .user {
+            margin-top: 12px;
+          }
+          .edit {
+            position: absolute;
+            top: 8px;
+            right: 15px;
+            color: #16a4de;
+
+            &:hover {
+              cursor: pointer;
+              color: #3ac3f7;
+            }
+          }
+        }
+
+        .line {
+          display: block;
+          margin: 20px auto;
+          width: 300px;
+          height: 2px;
+          background-color: #fff;
+          opacity: 0.3;
+        }
+
+        .signature {
+          .head {
+            .iconfont {
+              font-size: 20px;
+              margin-left: 30px;
+              margin-right: 12px;
+            }
+          }
+          .content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 24px;
+            height: 100px;
+            text-align: center;
+          }
+        }
       }
     }
   }

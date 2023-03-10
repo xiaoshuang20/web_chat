@@ -130,7 +130,7 @@
       </div>
       <div class="msg">
         <div class="container">
-          <span class="edit">编辑资料</span>
+          <span class="edit" @click="handleEdit">编辑资料</span>
           <div class="id">
             <span class="iconfont icon-zuanshi"></span>
             <span>{{ currentUser.objectId }}</span>
@@ -406,7 +406,7 @@ const handleExpand = (data) => {
       openSetting()
   }
 }
-// 个人信息设置弹窗
+// 个人信息弹窗
 let settingDialogVisible = ref(false)
 const openSetting = () => {
   settingDialogVisible.value = true
@@ -414,6 +414,7 @@ const openSetting = () => {
 const closeSetting = () => {
   settingDialogVisible.value = false
 }
+//
 </script>
 
 <style scoped lang="less">

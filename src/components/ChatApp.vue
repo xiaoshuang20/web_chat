@@ -116,8 +116,8 @@
       width="50%"
       :modal="false"
       draggable
-      @close-auto-focus="closeSetting"
-      @close="closeSetting"
+      @close-auto-focus="settingDialogVisible = false"
+      @close="settingDialogVisible = false"
     >
       <div class="bgc">
         <div class="avatar">
@@ -181,12 +181,63 @@
       </span>
     </template>
   </el-dialog>
+  <el-dialog
+    v-model="editgDialogVisible"
+    title="编辑资料"
+    width="30%"
+    :modal="false"
+    draggable
+    @close-auto-focus="handleEditClose"
+    @close="handleEditClose"
+  >
+    <div
+      :style="{
+        display: 'flex',
+        alignItems: 'center',
+      }"
+    >
+      <span
+        :style="{
+          width: '80px',
+        }"
+        >用户名</span
+      >
+      <el-input v-model="editName" placeholder="请输入用户名"></el-input>
+    </div>
+    <div
+      :style="{
+        display: 'flex',
+        alignItems: 'center',
+      }"
+    >
+      <span
+        :style="{
+          width: '80px',
+        }"
+        >个性签名</span
+      >
+      <el-input
+        v-model="editSignature"
+        type="textarea"
+        placeholder="这里什么也没有哦~"
+        :style="{
+          marginTop: '20px',
+        }"
+      ></el-input>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="editgDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="edit">确定</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
-import { getCurrentTime, expressTime, getAssetsFile } from '../utils'
+import { getCurrentTime, expressTime, getAssetsFile, messageU } from '../utils'
 import { computed } from 'vue'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
@@ -242,10 +293,7 @@ let dialogVisible = ref(false)
 let addName = ref('')
 const addFriend = () => {
   if (addName.value === '') {
-    ElMessage({
-      message: '输入用户昵称才能搜索哦',
-      type: 'warning',
-    })
+    messageU.warn('输入用户昵称才能搜索哦')
     return
   }
   socket.emit(
@@ -264,17 +312,11 @@ const addFriendsSuccess = (data, msg) => {
     allFriends.value.push(data)
     friends.value.push(data)
   }
-  ElMessage({
-    message: msg,
-    type: 'success',
-  })
+  messageU.success(msg)
   handleClose()
 }
 const addFriendsFail = (data) => {
-  ElMessage({
-    message: data,
-    type: 'warning',
-  })
+  messageU.warn(data)
   handleClose()
 }
 const handleClose = () => {
@@ -364,10 +406,7 @@ const addMessage = (msg) => {
   }
 }
 const sendMessageFail = (data) => {
-  ElMessage({
-    message: data,
-    type: 'error',
-  })
+  messageU.error(data)
 }
 // 收到消息
 const getMessage = (msg) => {
@@ -404,6 +443,10 @@ const handleExpand = (data) => {
   switch (data.type) {
     case 'setting':
       openSetting()
+      break
+    case 'wordcloud':
+      wordcloud()
+      break
   }
 }
 // 个人信息弹窗
@@ -411,10 +454,34 @@ let settingDialogVisible = ref(false)
 const openSetting = () => {
   settingDialogVisible.value = true
 }
-const closeSetting = () => {
-  settingDialogVisible.value = false
+// 编辑资料
+let editgDialogVisible = ref(false)
+let editName = ref('')
+let editSignature = ref('')
+// 打开编辑弹窗
+const handleEdit = () => {
+  editName.value = currentUser.value.name
+  editSignature.value =
+    currentUser.value.signature === '这里什么也没有哦~'
+      ? ''
+      : currentUser.value.signature
+  editgDialogVisible.value = true
 }
-//
+// 关闭编辑弹窗
+const handleEditClose = () => {
+  editgDialogVisible.value = false
+  editName.value = ''
+  editSignature.value = ''
+}
+// 确定修改
+const edit = () => {
+  if (editName.value === '') {
+    messageU.warn('用户名不能为空哦~')
+    return
+  }
+}
+// 词云图
+const wordcloud = () => {}
 </script>
 
 <style scoped lang="less">

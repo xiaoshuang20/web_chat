@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import { message } from '@/utils'
+import { messageU } from '@/utils'
 import { useRouter } from 'vue-router'
 import { io } from 'socket.io-client'
 
@@ -75,12 +75,12 @@ const register = async () => {
 }
 const registerSuccess = (data) => {
   window.sessionStorage.setItem('current_user', JSON.stringify(data))
-  message.success('注册成功')
+  messageU.success('注册成功')
   router.push('/chat')
   loading.value = false
 }
 const registerFail = () => {
-  message.warn('可恶, 这个名称被人抢先一步占了(ノ｀Д)ノ')
+  messageU.warn('可恶, 这个名称被人抢先一步占了(ノ｀Д)ノ')
   loading.value = false
 }
 
@@ -92,12 +92,12 @@ const login = async () => {
 }
 const loginSuccess = (data) => {
   window.sessionStorage.setItem('current_user', JSON.stringify(data))
-  message.success('登录成功，欢迎回来~')
+  messageU.success('登录成功，欢迎回来~')
   router.push('/chat')
   loading1.value = false
 }
 const loginFail = () => {
-  message.error('啊哦, 账号密码好像不对欸')
+  messageU.error('啊哦, 账号密码好像不对欸')
   loading1.value = false
 }
 </script>

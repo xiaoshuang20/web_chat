@@ -25,4 +25,4 @@ class Message {
   }
 }
 
-export const message = new Message()
+export const messageU = new Message()

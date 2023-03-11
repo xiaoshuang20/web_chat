@@ -51,7 +51,7 @@ const user = {
   },
 
   // 添加好友
-  async addFriends(name, user, roomName) {
+  async addFriends(name, user) {
     const queryUsers = Bmob.Query('users')
     queryUsers.equalTo('name', '==', name)
     let res = await queryUsers.find()
@@ -59,7 +59,7 @@ const user = {
 
     let flag1 = await this.add(res[0].objectId, user.objectId)
     let flag2 = await this.add(user.objectId, res[0].objectId)
-    let flag3 = await this.createRoom(roomName)
+    let flag3 = await this.createRoom(`${user.objectId}_${res[0].objectId}`)
     if (flag1 && flag2 && flag3) {
       return res[0]
     }
@@ -92,6 +92,20 @@ const user = {
   async updateTarget(id) {
     let res = await this.getUserMsg(id)
     return res
+  },
+
+  // 更新个性签名
+  async changeSignature(id, data) {
+    let res = await this.getUserMsg(id)
+    res.set('signature', data)
+    res.save()
+  },
+
+  // 更新用户名
+  async changeName(id, data) {
+    let res = await this.getUserMsg(id)
+    res.set('name', data)
+    res.save()
   },
 }
 

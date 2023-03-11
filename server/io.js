@@ -33,19 +33,21 @@ io.on('connection', (socket) => {
     let friends = await api.getAllFriend(data.objectId)
     let lastMsg = []
     for (let i = 0; i < friends.length; i++) {
-      let res = await api.getHistoryMessage(`${data.name}_${friends[i].name}`)
+      let res = await api.getHistoryMessage(
+        `${data.objectId}_${friends[i].objectId}`
+      )
       lastMsg.push(res)
     }
     // 避免不同页面之间的刷新互相影响
     io.to(socket.id).emit('getAllFriendSuccess', friends, lastMsg)
   })
 
-  socket.on('addFriends', async (data, user, roomName) => {
+  socket.on('addFriends', async (data, user) => {
     if (data === user.name) {
       io.to(socket.id).emit('addFriendsFail', '不能添加自己为好友哦~')
       return
     }
-    let res = await api.addFriends(data, user, roomName)
+    let res = await api.addFriends(data, user)
     if (!res) {
       io.to(socket.id).emit('addFriendsFail', '搜索用户不存在诶')
       return
@@ -59,6 +61,15 @@ io.on('connection', (socket) => {
 
   socket.on('setRoomId', async (id) => {
     await api.setRoomId({ objectId: id, id: socket.id })
+  })
+
+  socket.on('changeSignature', async (user, data) => {
+    await api.changeSignature(user.objectId, data)
+  })
+
+  socket.on('changeName', async (user, data) => {
+    await api.changeName(user.objectId, data)
+    socket.broadcast.emit('changeNameSuccess', user.objectId, data)
   })
 
   // > 消息区域
@@ -77,7 +88,7 @@ io.on('connection', (socket) => {
 
   socket.on('changeReadStatus', async (msg) => {
     let { from, to, currentTime } = msg
-    await api.changeReadStatus(`${from.name}_${to.name}`, currentTime)
+    await api.changeReadStatus(`${from.objectId}_${to.objectId}`, currentTime)
   })
 
   socket.on('clearUnread', async (name) => {

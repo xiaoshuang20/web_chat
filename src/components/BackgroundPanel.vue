@@ -4,7 +4,7 @@
       <BubbleFrame
         v-for="(msg, index) in props.message"
         :key="index"
-        :isSend="msg.from?.name === props.currentUser"
+        :isSend="msg.from?.objectId === props.currentUser.objectId"
         :msg="msg"
       />
     </div>

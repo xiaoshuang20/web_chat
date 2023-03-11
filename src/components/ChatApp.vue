@@ -36,7 +36,7 @@
           <li
             v-for="(user, index) in friends"
             :key="user.objectId"
-            @click="changeCurrent(user.name)"
+            @click="changeCurrent(user.objectId)"
             :class="{ active: current === index }"
           >
             <div class="left">
@@ -105,7 +105,7 @@
       <BackgroundPanel
         v-if="targetUser"
         :message="message"
-        :currentUser="currentUser.name"
+        :currentUser="currentUser"
         @sendMessage="sendMessage"
       />
       <div class="emptyUser" v-else>这里还什么也没有哦, 快去跟好友聊天吧！</div>
@@ -256,6 +256,7 @@ const initConnect = async () => {
   socket.on('addFriendsFail', addFriendsFail)
   socket.on('sendMessageFail', sendMessageFail)
   socket.on('getMessage', getMessage)
+  socket.on('changeNameSuccess', changeName)
 }
 
 const setRoomId = () => {
@@ -269,7 +270,7 @@ let currentUser = ref(null)
 let historyMsg = ref({})
 let targetUser = ref(null)
 const roomName = computed(() => {
-  return `${currentUser.value?.name}_${targetUser.value?.name}`
+  return `${currentUser.value?.objectId}_${targetUser.value?.objectId}`
 })
 
 // 获取所有好友
@@ -296,12 +297,7 @@ const addFriend = () => {
     messageU.warn('输入用户昵称才能搜索哦')
     return
   }
-  socket.emit(
-    'addFriends',
-    addName.value,
-    currentUser.value,
-    `${currentUser.value?.name}_${addName.value}`
-  )
+  socket.emit('addFriends', addName.value, currentUser.value)
 }
 const addFriendsSuccess = (data, msg) => {
   // 直接将添加的好友 push到好友数组，不需要发起获取好友请求
@@ -325,11 +321,11 @@ const handleClose = () => {
 }
 // 切换聊天对象
 let current = ref() // 当前选中用户
-const changeCurrent = async (name) => {
-  if (current.value === name) return
-  current.value = name
+const changeCurrent = async (userId) => {
+  if (current.value === userId) return
+  current.value = userId
   targetUser.value = friends.value.find((item) => {
-    return item.name === name
+    return item.objectId === userId
   })
   message.value = historyMsg.value[`to_${targetUser.value.name}`]
     ? [...historyMsg.value[`to_${targetUser.value.name}`]]
@@ -345,6 +341,15 @@ const searchFriend = () => {
   friends.value = allFriends.value.filter((item) => {
     return item.name.includes(searchKey.value)
   })
+}
+// 有人改名字了
+const changeName = (id, name) => {
+  let index = friends.value.findIndex((item) => item.objectId === id)
+  if (index !== -1) {
+    friends.value[index].name = name
+    let index1 = allFriends.value.findIndex((item) => item.objectId === id)
+    allFriends.value[index1].name = name
+  }
 }
 
 /**
@@ -479,6 +484,25 @@ const edit = () => {
     messageU.warn('用户名不能为空哦~')
     return
   }
+  if (editName.value !== currentUser.name) {
+    socket.emit('changeName', currentUser.value, editName.value)
+  }
+  if (
+    editSignature.value !== '' &&
+    editSignature.value !== currentUser.signature
+  ) {
+    socket.emit('changeSignature', currentUser.value, editSignature.value)
+  }
+
+  currentUser.value.name = editName.value
+  currentUser.value.signature = editSignature.value
+  window.sessionStorage.setItem(
+    'current_user',
+    JSON.stringify(currentUser.value)
+  )
+
+  messageU.success('修改成功！')
+  editgDialogVisible.value = false
 }
 // 词云图
 const wordcloud = () => {}

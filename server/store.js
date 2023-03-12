@@ -114,11 +114,20 @@ const user = {
 
   // 上传头像
   async uploadAvatar(file) {
-    let name = Date.now() + 'png'
-    let temp = Bmob.File(name, file)
-    let res = await temp.save()
-    console.log(res)
-    return res
+    // 上传到本地会导致资源重新加载
+    // let fileName = Date.now() + '.png'
+    // let filePath = dir + 'avatar\\' + fileName
+    // let base64 = file.replace(/^data:image\/\w+;base64,/, '')
+    // let dataBuffer = Buffer.from(base64, 'base64')
+    // return new Promise((resolve, reject) => {
+    //   fs.writeFile(filePath, dataBuffer, function (err) {
+    //     if (!err) {
+    //       resolve('avatar\\' + fileName)
+    //     } else {
+    //       reject(false)
+    //     }
+    //   })
+    // })
   },
 }
 

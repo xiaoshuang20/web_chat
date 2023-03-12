@@ -278,7 +278,6 @@
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
 import { getCurrentTime, expressTime, getAssetsFile, messageU } from '../utils'
-import { computed } from 'vue'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
 
@@ -580,7 +579,13 @@ const handleFile = (e) => {
     return
   }
 
-  socket.emit('uploadAvatar', file)
+  // 读 base64 编码
+  let reader = new FileReader()
+  reader.readAsDataURL(file)
+  reader.onloadend = () => {
+    let res = reader.result
+    socket.emit('uploadAvatar', res)
+  }
 }
 const changeAvatar = (data) => {
   console.log(data, 'data')

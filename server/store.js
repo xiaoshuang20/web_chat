@@ -1,4 +1,8 @@
 import Bmob from 'hydrogen-js-sdk'
+import fs from 'fs'
+import path from 'path'
+
+const dir = 'D:\\学习\\github\\web_chat\\src\\assets\\images\\'
 
 const user = {
   // 用户登录
@@ -106,6 +110,23 @@ const user = {
     let res = await this.getUserMsg(id)
     res.set('name', data)
     res.save()
+  },
+
+  // 上传头像
+  async uploadAvatar(file) {
+    let fileName = Date.now() + '.png'
+    let filePath = dir + 'avatar\\' + fileName
+    let base64 = file.replace(/^data:image\/\w+;base64,/, '')
+    let dataBuffer = Buffer.from(base64, 'base64')
+    return new Promise((resolve, reject) => {
+      fs.writeFile(filePath, dataBuffer, function (err) {
+        if (!err) {
+          resolve('avatar\\' + fileName)
+        } else {
+          reject(false)
+        }
+      })
+    })
   },
 }
 

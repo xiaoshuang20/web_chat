@@ -40,7 +40,12 @@
             :class="{ active: current === index }"
           >
             <div class="left">
-              <el-avatar :size="40" :src="user.avatarUrl" />
+              <!-- 双击头像查看用户个人信息面板 -->
+              <el-avatar
+                :size="40"
+                :src="user.avatarUrl"
+                @dblclick="dbclickUser(user)"
+              />
             </div>
             <div class="center">
               <span>{{ user.name }}</span>
@@ -107,6 +112,7 @@
         :message="message"
         :currentUser="currentUser"
         @sendMessage="sendMessage"
+        ref="panel"
       />
       <div class="emptyUser" v-else>这里还什么也没有哦, 快去跟好友聊天吧！</div>
     </div>
@@ -116,28 +122,62 @@
       width="50%"
       :modal="false"
       draggable
-      @close-auto-focus="settingDialogVisible = false"
-      @close="settingDialogVisible = false"
+      @close-auto-focus="closeSetting"
+      @close="closeSetting"
     >
       <div class="bgc">
         <div class="avatar">
-          <el-avatar :size="60" :src="getAssetsFile(currentUser.avatarUrl)" />
+          <el-popover
+            placement="bottom-start"
+            trigger="hover"
+            content="点击更换头像"
+            :hide-after="0"
+            :show-after="1000"
+            v-if="cardMsgUser.objectId === currentUser.objectId"
+          >
+            <template #reference>
+              <el-avatar
+                :size="60"
+                :src="getAssetsFile(cardMsgUser.avatarUrl)"
+                @mouseover="hoverAvatar"
+                @mouseleave="leaveAvatar"
+                :class="{ hover_color: isHover }"
+                @click="hiddenInput.click()"
+              />
+            </template>
+          </el-popover>
+          <el-avatar
+            v-else
+            :size="60"
+            :src="getAssetsFile(cardMsgUser.avatarUrl)"
+          />
           <div class="user_msg">
-            <p class="name">{{ currentUser.name }}</p>
-            <p class="signature">{{ currentUser.signature }}</p>
+            <p class="name">{{ cardMsgUser.name }}</p>
+            <p class="signature">{{ cardMsgUser.signature }}</p>
           </div>
+          <input
+            type="file"
+            v-show="false"
+            ref="hiddenInput"
+            @change="handleFile"
+          />
         </div>
       </div>
       <div class="msg">
         <div class="container">
-          <span class="edit" @click="handleEdit">编辑资料</span>
+          <span
+            class="edit"
+            @click="handleEdit"
+            v-if="cardMsgUser.objectId === currentUser.objectId"
+            >编辑资料</span
+          >
           <div class="id">
             <span class="iconfont icon-zuanshi"></span>
-            <span>{{ currentUser.objectId }}</span>
+            <span>{{ cardMsgUser.objectId }}</span>
           </div>
           <div class="user">
             <span class="iconfont icon-user"></span>
-            <span>{{ currentUser.name }}</span>
+            <span>{{ cardMsgUser.name }}</span>
           </div>
         </div>
         <span class="line"></span>
@@ -146,7 +186,7 @@
             <span class="iconfont icon-signature"></span>
             <span>个性签名</span>
           </div>
-          <div class="content">{{ currentUser.signature }}</div>
+          <div class="content">{{ cardMsgUser.signature }}</div>
         </div>
       </div>
     </el-dialog>
@@ -257,6 +297,7 @@ const initConnect = async () => {
   socket.on('sendMessageFail', sendMessageFail)
   socket.on('getMessage', getMessage)
   socket.on('changeNameSuccess', changeName)
+  socket.on('changeAvatar', changeAvatar)
 }
 
 const setRoomId = () => {
@@ -401,6 +442,7 @@ const sendMessage = (msg) => {
   socket.emit('sendMessage', roomName.value, body)
 }
 // 添加信息
+const panel = ref()
 const addMessage = (msg) => {
   // 不能影响当前对话框
   if (
@@ -409,6 +451,8 @@ const addMessage = (msg) => {
   ) {
     message.value.push(msg)
   }
+  // 最新消息自动滚动到底部
+  panel.value.scroll()
 }
 const sendMessageFail = (data) => {
   messageU.error(data)
@@ -417,9 +461,9 @@ const sendMessageFail = (data) => {
 const getMessage = (msg) => {
   if (msg.from.objectId !== targetUser.value?.objectId) {
     msg.isRead = false
+    socket.emit('changeReadStatus', msg)
   }
   addMessage(msg)
-  socket.emit('changeReadStatus', msg)
   // 保证侧边栏展示的是最后一条历史信息
   if (historyMsg.value[`to_${msg.from.name}`]) {
     historyMsg.value[`to_${msg.from.name}`].push(msg)
@@ -456,7 +500,17 @@ const handleExpand = (data) => {
 }
 // 个人信息弹窗
 let settingDialogVisible = ref(false)
+const cardMsgUser = ref()
 const openSetting = () => {
+  cardMsgUser.value = currentUser.value
+  settingDialogVisible.value = true
+}
+const closeSetting = () => {
+  settingDialogVisible.value = false
+}
+// 好友的信息弹窗
+const dbclickUser = (user) => {
+  cardMsgUser.value = user
   settingDialogVisible.value = true
 }
 // 编辑资料
@@ -503,6 +557,38 @@ const edit = () => {
 
   messageU.success('修改成功！')
   editgDialogVisible.value = false
+}
+// 换头像
+const isHover = ref(false)
+const hiddenInput = ref()
+const hoverAvatar = () => {
+  isHover.value = true
+}
+const leaveAvatar = () => {
+  isHover.value = false
+}
+const handleFile = (e) => {
+  const reg = /\.(?:png|jpg|jepg)$/i
+  let file = e.target.files[0]
+  if (!reg.test(file.name)) {
+    messageU.warn('请选择正确格式的图片文件!')
+    return
+  }
+  let maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    messageU.warn('图片大小不能超过5M!')
+    return
+  }
+  // 读 base64 编码
+  let reader = new FileReader()
+  reader.readAsDataURL(file)
+  reader.onloadend = () => {
+    let res = reader.result
+    socket.emit('uploadAvatar', res)
+  }
+}
+const changeAvatar = (path) => {
+  console.log(getAssetsFile(path))
 }
 // 词云图
 const wordcloud = () => {}
@@ -793,12 +879,17 @@ const wordcloud = () => {}
           background-color: rgba(112, 118, 135, 0.8);
 
           .el-avatar {
+            border: 1px solid #fff;
             transition: all 0.5s ease-in-out;
 
             &:hover {
               cursor: pointer;
               transform: rotate(360deg);
             }
+          }
+
+          .hover_color {
+            border: 1px solid #009bdb;
           }
 
           .user_msg {

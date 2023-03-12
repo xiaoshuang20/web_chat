@@ -4,5 +4,8 @@ export const getAssetsFile = (url) => {
   if (url.includes('img')) {
     return url
   }
+  if (url.includes('avatar/')) {
+    return new URL(`../assets/images/${url}`, import.meta.url).href
+  }
   return new URL(`../assets/images/emoji/${url}`, import.meta.url).href
 }

@@ -80,11 +80,6 @@ const sendMessage = () => {
   setTimeout(() => {
     message.value = ''
   }, 0)
-
-  // 接收到新的消息时保持滚动条在最底部
-  nextTick(() => {
-    window.value.scrollTop = window.value.scrollHeight
-  })
 }
 
 // 窗口滚动条
@@ -95,15 +90,21 @@ const isScroll = computed(() => (el) => {
     return false
   }
 })
+// 最新消息自动滚动
+const scroll = () => {
+  // 接收到新的消息时保持滚动条在最底部
+  nextTick(() => {
+    window.value.scrollTop = window.value.scrollHeight
+  })
+}
+defineExpose({ scroll }) // 将该事件暴露出去
 // 监听消息添加/输入事件
 let timer = null
 const input = ref()
 const window = ref()
 watchEffect(() => {
   // 这里只会触发一次（疑惑：props.message变化监听不到？）
-  nextTick(() => {
-    window.value.scrollTop = window.value.scrollHeight
-  })
+  scroll()
   if (props.message && window.value) {
     clearTimeout(timer)
     timer = setTimeout(() => {

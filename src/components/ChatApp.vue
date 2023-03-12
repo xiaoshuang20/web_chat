@@ -579,16 +579,11 @@ const handleFile = (e) => {
     messageU.warn('图片大小不能超过5M!')
     return
   }
-  // 读 base64 编码
-  let reader = new FileReader()
-  reader.readAsDataURL(file)
-  reader.onloadend = () => {
-    let res = reader.result
-    socket.emit('uploadAvatar', res)
-  }
+
+  socket.emit('uploadAvatar', file)
 }
-const changeAvatar = (path) => {
-  console.log(getAssetsFile(path))
+const changeAvatar = (data) => {
+  console.log(data, 'data')
 }
 // 词云图
 const wordcloud = () => {}

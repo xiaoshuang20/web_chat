@@ -1,4 +1,5 @@
 import Bmob from 'hydrogen-js-sdk'
+import path from 'path'
 
 // 测试
 Bmob.initialize('bc82f997576ffeca', 'xiao')
@@ -30,7 +31,7 @@ Bmob.initialize('bc82f997576ffeca', 'xiao')
 
 const query = Bmob.Query('user_message')
 query
-  .get('34c217e66d')
+  .get('b396db39ce')
   .then((res) => {
     res.unset('message')
     res.save()

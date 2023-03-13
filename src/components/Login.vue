@@ -7,7 +7,7 @@
         </div>
       </template>
       <div class="avatar">
-        <el-avatar :size="80" src="/img/avatar.jpg" />
+        <el-avatar :size="80" src="/static/img/avatar.jpg" />
       </div>
       <div class="input">
         <el-input v-model="body.name" placeholder="用户名">

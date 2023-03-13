@@ -2,7 +2,7 @@ import Bmob from 'hydrogen-js-sdk'
 import fs from 'fs'
 import path from 'path'
 
-const dir = 'D:\\学习\\github\\web_chat\\src\\assets\\images\\'
+const dir = path.resolve()
 
 const user = {
   // 用户登录
@@ -28,7 +28,7 @@ const user = {
       queryUsers.set('name', data.name)
       queryUsers.set('password', data.password)
       queryUsers.set('type', 'user')
-      queryUsers.set('avatarUrl', '/img/avatar.jpg')
+      queryUsers.set('avatarUrl', '/static/img/avatar.jpg')
       // queryUsers.set('roomID', data.id)
       queryUsers.set('signature', '这里什么也没有哦~')
       let res = await queryUsers.save()
@@ -114,21 +114,28 @@ const user = {
 
   // 上传头像
   async uploadAvatar(file) {
-    // 上传到本地会导致资源重新加载
-    // let fileName = Date.now() + '.png'
-    // let filePath = dir + 'avatar\\' + fileName
-    // let base64 = file.replace(/^data:image\/\w+;base64,/, '')
-    // let dataBuffer = Buffer.from(base64, 'base64')
-    // return new Promise((resolve, reject) => {
-    //   fs.writeFile(filePath, dataBuffer, function (err) {
-    //     if (!err) {
-    //       resolve('avatar\\' + fileName)
-    //     } else {
-    //       reject(false)
-    //     }
-    //   })
-    // })
+    // 上传到assets会导致资源重新加载
+    let fileName = Date.now() + '.png'
+    let temp = dir.split('\\')
+    temp[temp.length - 1] = 'public/static/avatar/'
+    let filePath = temp.join('/') + fileName
+    let base64 = file.replace(/^data:image\/\w+;base64,/, '')
+    let dataBuffer = Buffer.from(base64, 'base64')
+    return new Promise((resolve, reject) => {
+      fs.writeFile(filePath, dataBuffer, function (err) {
+        if (!err) {
+          resolve('/static/avatar/' + fileName)
+        } else {
+          reject(false)
+        }
+      })
+    })
   },
+  async changeAvatar(id, path) {
+    let res = await this.getUserMsg(id)
+    res.set('avatarUrl', path)
+    res.save()
+  }
 }
 
 const message = {

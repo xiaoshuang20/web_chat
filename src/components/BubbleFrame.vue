@@ -6,7 +6,7 @@
     }"
   >
     <div class="chat-bubble-avatar" v-if="!props.isSend">
-      <el-avatar :size="40" :src="msg.to.avatarUrl" />
+      <el-avatar :size="40" :src="msg.from.avatarUrl" />
     </div>
     <div
       class="chat-bubble-msg"

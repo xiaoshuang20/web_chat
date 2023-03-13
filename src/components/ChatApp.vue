@@ -34,10 +34,10 @@
         </div>
         <ul v-if="friends" class="user">
           <li
-            v-for="(user, index) in friends"
+            v-for="user in friends"
             :key="user.objectId"
             @click="changeCurrent(user.objectId)"
-            :class="{ active: current === index }"
+            :class="{ active: current === user.objectId }"
           >
             <div class="left">
               <!-- 双击头像查看用户个人信息面板 -->
@@ -51,9 +51,9 @@
               <span>{{ user.name }}</span>
               <p>
                 {{
-                  historyMsg[`to_${user.name}`]
-                    ? historyMsg[`to_${user.name}`][
-                        historyMsg[`to_${user.name}`].length - 1
+                  historyMsg[`to_${user.objectId}`]
+                    ? historyMsg[`to_${user.objectId}`][
+                        historyMsg[`to_${user.objectId}`].length - 1
                       ].content
                     : '已添加好友'
                 }}
@@ -61,23 +61,27 @@
             </div>
             <div class="right">
               <span>{{
-                historyMsg[`to_${user.name}`]
+                historyMsg[`to_${user.objectId}`]
                   ? expressTime(
-                      historyMsg[`to_${user.name}`][
-                        historyMsg[`to_${user.name}`].length - 1
+                      historyMsg[`to_${user.objectId}`][
+                        historyMsg[`to_${user.objectId}`].length - 1
                       ].currentTime
                     )
                   : expressTime(user.updatedAt)
               }}</span>
               <div class="msg_unread_box">
                 <div
-                  v-show="unreadNum(user.name) !== -1"
-                  :class="{ much_msg: unreadNum(user.name) > 99 }"
+                  v-show="unreadNum(user.objectId) !== -1"
+                  :class="{ much_msg: unreadNum(user.objectId) > 99 }"
                 >
                   <p>
-                    {{ unreadNum(user.name) > 99 ? 99 : unreadNum(user.name) }}
+                    {{
+                      unreadNum(user.objectId) > 99
+                        ? 99
+                        : unreadNum(user.objectId)
+                    }}
                   </p>
-                  <span v-if="unreadNum(user.name) > 99">+</span>
+                  <span v-if="unreadNum(user.objectId) > 99">+</span>
                 </div>
               </div>
             </div>
@@ -296,7 +300,9 @@ const initConnect = async () => {
   socket.on('sendMessageFail', sendMessageFail)
   socket.on('getMessage', getMessage)
   socket.on('changeNameSuccess', changeName)
+  socket.on('changeSignatureSuccess', changeSignature)
   socket.on('changeAvatar', changeAvatar)
+  socket.on('changeAvatarSuccess', changeAvatarSuccess)
 }
 
 const setRoomId = () => {
@@ -325,7 +331,7 @@ const changeFriendsList = (data, msg) => {
     friends.value = data
     // 同时记录历史信息
     data.forEach((item, index) => {
-      historyMsg.value[`to_${item.name}`] = msg[index]
+      historyMsg.value[`to_${item.objectId}`] = msg[index]
     })
   }
 }
@@ -364,13 +370,11 @@ let current = ref() // 当前选中用户
 const changeCurrent = async (userId) => {
   if (current.value === userId) return
   current.value = userId
-  targetUser.value = friends.value.find((item) => {
-    return item.objectId === userId
-  })
-  message.value = historyMsg.value[`to_${targetUser.value.name}`]
-    ? [...historyMsg.value[`to_${targetUser.value.name}`]]
+  targetUser.value = friends.value.find((item) => item.objectId === userId)
+  message.value = historyMsg.value[`to_${userId}`]
+    ? [...historyMsg.value[`to_${userId}`]]
     : []
-  clearUnread(targetUser.value.name)
+  clearUnread(userId)
 }
 // 搜索好友
 let searchKey = ref('')
@@ -391,14 +395,49 @@ const changeName = (id, name) => {
     allFriends.value[index1].name = name
   }
 }
+// 改签名了
+const changeSignature = (id, data) => {
+  let index = friends.value.findIndex((item) => item.objectId === id)
+  if (index !== -1) {
+    friends.value[index].signature = data
+    let index1 = allFriends.value.findIndex((item) => item.objectId === id)
+    allFriends.value[index1].signature = data
+  }
+}
+// 有人改头像了
+const changeAvatarSuccess = (user, path) => {
+  let index = friends.value.findIndex((item) => item.objectId === user.objectId)
+  if (index !== -1) {
+    friends.value[index].avatarUrl = path // 侧边栏头像的更新
+    let index1 = allFriends.value.findIndex(
+      (item) => item.objectId === user.objectId
+    )
+    allFriends.value[index1].avatarUrl = path
+    // 聊天消息中的头像也要实时更新
+    if (targetUser.value?.objectId === user.objectId) {
+      message.value.forEach((item, index) => {
+        if (item.from.objectId === user.objectId) {
+          message.value[index].from.avatarUrl = path
+        }
+      })
+      historyMsg.value[`to_${user.objectId}`] = [...message.value]
+    } else {
+      historyMsg.value[`to_${user.objectId}`].forEach((item, index) => {
+        if (item.from.objectId === user.objectId) {
+          historyMsg.value[`to_${user.objectId}`][index].from.avatarUrl = path
+        }
+      })
+    }
+  }
+}
 
 /**
  * > 消息区域
  */
 let message = ref([]) // 历史记录
 // 未读消息
-let unreadNum = computed(() => (name) => {
-  let temp = historyMsg.value[`to_${name}`]
+let unreadNum = computed(() => (id) => {
+  let temp = historyMsg.value[`to_${id}`]
   let num = 0
   if (temp) {
     temp.forEach((item) => {
@@ -411,11 +450,11 @@ let unreadNum = computed(() => (name) => {
   }
 })
 // 清除未读消息
-const clearUnread = (name) => {
-  if (unreadNum.value(name) !== -1) {
-    historyMsg.value[`to_${name}`].forEach((item, index) => {
+const clearUnread = (id) => {
+  if (unreadNum.value(id) !== -1) {
+    historyMsg.value[`to_${id}`].forEach((item, index) => {
       if (!item.isRead) {
-        historyMsg.value[`to_${name}`][index].isRead = true
+        historyMsg.value[`to_${id}`][index].isRead = true
       }
     })
     socket.emit('clearUnread', roomName.value)
@@ -433,10 +472,10 @@ const sendMessage = (msg) => {
   }
   addMessage(body)
   // 保证侧边栏展示的是最后一条历史信息
-  if (historyMsg.value[`to_${targetUser.value.name}`]) {
-    historyMsg.value[`to_${targetUser.value.name}`].push(body)
+  if (historyMsg.value[`to_${targetUser.value.objectId}`]) {
+    historyMsg.value[`to_${targetUser.value.objectId}`].push(body)
   } else {
-    historyMsg.value[`to_${targetUser.value.name}`] = [body]
+    historyMsg.value[`to_${targetUser.value.objectId}`] = [body]
   }
   socket.emit('sendMessage', roomName.value, body)
 }
@@ -449,9 +488,8 @@ const addMessage = (msg) => {
     msg.from.objectId === currentUser.value.objectId
   ) {
     message.value.push(msg)
+    panel.value.scroll() //最新消息自动滚动到底部
   }
-  // 最新消息自动滚动到底部
-  panel.value.scroll()
 }
 const sendMessageFail = (data) => {
   messageU.error(data)
@@ -464,10 +502,10 @@ const getMessage = (msg) => {
   }
   addMessage(msg)
   // 保证侧边栏展示的是最后一条历史信息
-  if (historyMsg.value[`to_${msg.from.name}`]) {
-    historyMsg.value[`to_${msg.from.name}`].push(msg)
+  if (historyMsg.value[`to_${msg.from.objectId}`]) {
+    historyMsg.value[`to_${msg.from.objectId}`].push(msg)
   } else {
-    historyMsg.value[`to_${msg.from.name}`] = [msg]
+    historyMsg.value[`to_${msg.from.objectId}`] = [msg]
   }
 }
 
@@ -584,11 +622,38 @@ const handleFile = (e) => {
   reader.readAsDataURL(file)
   reader.onloadend = () => {
     let res = reader.result
-    socket.emit('uploadAvatar', res)
+    socket.emit('uploadAvatar', res, currentUser.value)
   }
 }
-const changeAvatar = (data) => {
-  console.log(data, 'data')
+const changeAvatar = (path) => {
+  cardMsgUser.value.avatarUrl = path
+  currentUser.value.avatarUrl = path
+  window.sessionStorage.setItem(
+    'current_user',
+    JSON.stringify(currentUser.value)
+  )
+  messageU.success('修改成功！')
+  if (message.value.length !== 0) {
+    // 当前聊天框里更新头像
+    message.value.forEach((item, index) => {
+      if (item.from.objectId === currentUser.value.objectId) {
+        message.value[index].from.avatarUrl = path
+      }
+    })
+  }
+  // 历史记录里也更新头像（我敲，这处理方法我都看不下去，后期看能不能优化下）
+  for (let item in historyMsg.value) {
+    if (item !== `to_${targetUser.value?.objectId}`) {
+      historyMsg.value[item].forEach((msg, index) => {
+        if (msg.from.objectId === currentUser.value.objectId) {
+          historyMsg.value[item][index].from.avatarUrl = path
+        }
+      })
+    } else {
+      // 经量减少点遍历
+      historyMsg.value[item] = [...message.value]
+    }
+  }
 }
 // 词云图
 const wordcloud = () => {}
@@ -864,7 +929,7 @@ const wordcloud = () => {}
         justify-content: flex-end;
         flex: 1;
         height: 400px;
-        background: url('/img/home.jpg') no-repeat center;
+        background: url('/static/img/home.jpg') no-repeat center;
         background-size: cover;
         border-top-left-radius: 10px;
         border-bottom-left-radius: 10px;

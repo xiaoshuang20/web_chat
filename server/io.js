@@ -65,6 +65,7 @@ io.on('connection', (socket) => {
 
   socket.on('changeSignature', async (user, data) => {
     await api.changeSignature(user.objectId, data)
+    socket.broadcast.emit('changeSignatureSuccess', user.objectId, data)
   })
 
   socket.on('changeName', async (user, data) => {
@@ -72,9 +73,11 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('changeNameSuccess', user.objectId, data)
   })
 
-  socket.on('uploadAvatar', async (file) => {
+  socket.on('uploadAvatar', async (file, user) => {
     let res = await api.uploadAvatar(file)
     io.to(socket.id).emit('changeAvatar', res)
+    socket.broadcast.emit('changeAvatarSuccess', user, res)
+    await api.changeAvatar(user.objectId, res)
   })
 
   // > 消息区域

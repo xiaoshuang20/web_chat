@@ -16,7 +16,7 @@ import ChatApp from './components/ChatApp.vue'
   width: 100%;
   height: 100%;
   position: fixed;
-  background: url('/img/bgc.jpg') no-repeat center;
+  background: url('/static/img/bgc.jpg') no-repeat center;
   background-size: cover;
 }
 </style>

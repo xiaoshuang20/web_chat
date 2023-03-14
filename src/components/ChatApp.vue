@@ -656,7 +656,9 @@ const changeAvatar = (path) => {
   }
 }
 // 词云图
-const wordcloud = () => {}
+const wordcloud = () => {
+  // 当前message遍历，每条信息先使用replace替换常见标点符，再以空格切割，再生成词云图
+}
 </script>
 
 <style scoped lang="less">

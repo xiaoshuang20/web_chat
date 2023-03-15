@@ -317,7 +317,6 @@ import {
   messageU,
   shapes,
 } from '../utils'
-import { nextTick } from 'vue'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
 

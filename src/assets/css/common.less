@@ -24,3 +24,54 @@ li {
     cursor: initial !important;
   }
 }
+
+.wordcloud {
+  .el-dialog__body {
+    padding-top: 20px;
+    padding-bottom: 12px;
+
+    #wordcloud {
+      height: 200px;
+    }
+  }
+
+  .el-dialog__footer {
+    height: 40px;
+
+    ul {
+      position: relative;
+      display: flex;
+      justify-content: end;
+
+      &::before {
+        position: absolute;
+        content: '';
+        width: 100%;
+        height: 1px;
+        top: 0;
+        background-color: #d5e6e8;
+      }
+
+      li {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        margin-right: 5px;
+        color: #636b6c;
+        opacity: 0.8;
+        vertical-align: bottom;
+
+        &:hover {
+          cursor: pointer;
+          background-color: #ddeef0;
+        }
+      }
+
+      .choose {
+        color: skyblue;
+      }
+    }
+  }
+}

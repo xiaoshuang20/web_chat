@@ -276,12 +276,42 @@
       </span>
     </template>
   </el-dialog>
+  <el-dialog
+    class="wordcloud"
+    v-model="wordCloudDialogVisible"
+    width="30%"
+    :modal="false"
+    draggable
+    @close-auto-focus="closeWordcloud"
+    @close="closeWordcloud"
+  >
+    <div id="wordcloud" ref="container"></div>
+    <template #footer>
+      <ul>
+        <li
+          v-for="(icon, index) in shape"
+          :key="index"
+          class="iconfont"
+          :class="[icon, currentChoose === index ? 'choose' : '']"
+          @click="chooseShape(index)"
+        ></li>
+      </ul>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
+import * as echarts from 'echarts'
+import 'echarts-wordcloud'
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
-import { getCurrentTime, expressTime, getAssetsFile, messageU } from '../utils'
+import {
+  getCurrentTime,
+  expressTime,
+  getAssetsFile,
+  messageU,
+  shapes,
+} from '../utils'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
 
@@ -656,9 +686,108 @@ const changeAvatar = (path) => {
   }
 }
 // 词云图
+const container = ref()
+let myChart = ref()
+const shape = ref([
+  // 词云图形状
+  'icon-yueliang_fill',
+  'icon-a-aixin_shixin',
+  'icon-bird-xiaoniao',
+])
+const currentChoose = ref(2)
+const wordCloudDialogVisible = ref(false)
 const wordcloud = () => {
   // 当前message遍历，每条信息先使用replace替换常见标点符，再以空格切割，再生成词云图
+  if (message.value.length === 0) {
+    messageU.warn('当前没有信息哦~')
+    return
+  }
+  // 标点符号和 emoji不统计
+  let reg = /[,|?|!|.|，|？||！|。]/g
+  let emoji = /\[.*?\]/g
+  let words = {}
+  message.value.forEach((item) => {
+    if (item.content) {
+      let list = item.content.replace(reg, ' ').split(' ')
+      list.forEach((w) => {
+        if (!emoji.test(w)) {
+          if (words[w]) {
+            words[w]++
+          } else {
+            words[w] = 1
+          }
+        }
+      })
+    }
+  })
+  let arr = []
+  for (let word in words) {
+    arr.push({
+      name: word,
+      value: words[word],
+    })
+  }
+  draw(arr)
 }
+const draw = (data) => {
+  const fileReader = new FileReader()
+  console.log(shapes[currentChoose.value])
+  fileReader.readAsDataURL(shapes[currentChoose.value])
+  fileReader.onload = (event) => {
+    console.log(event)
+    try {
+      const { result } = event.target
+    } catch (e) {
+      console.log(e)
+    }
+  }
+  wordCloudDialogVisible.value = true
+
+  nextTick(() => {
+    myChart.value = echarts.init(container.value)
+    myChart.value.setOption({
+      tooltip: {
+        show: false,
+      },
+      series: [
+        {
+          type: 'wordCloud',
+          gridSize: 5,
+          sizeRange: [12, 55],
+          rotationRange: [-45, 0, 45, 90],
+          // maskImage: maskImage,
+          textStyle: {
+            color: function () {
+              let color =
+                'rgb(' +
+                [
+                  Math.round(Math.random() * 250),
+                  Math.round(Math.random() * 250),
+                  Math.round(Math.random() * 250),
+                ].join(',') +
+                ')'
+              return color
+            },
+          },
+          left: 'center',
+          top: 'center',
+          width: '100%',
+          height: '100%',
+          right: null,
+          bottom: null,
+          layoutAnimation: true,
+          data: data,
+        },
+      ],
+    })
+  })
+}
+const closeWordcloud = () => {
+  wordCloudDialogVisible.value = false
+  myChart.value.dispose() // 销毁图例
+}
+
+const chooseShape = (index) => {}
 </script>
 
 <style scoped lang="less">

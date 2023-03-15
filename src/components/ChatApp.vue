@@ -285,7 +285,12 @@
     @close-auto-focus="closeWordcloud"
     @close="closeWordcloud"
   >
-    <div id="wordcloud" ref="container"></div>
+    <div
+      v-loading="loading"
+      element-loading-text="Loading..."
+      id="wordcloud"
+      ref="container"
+    ></div>
     <template #footer>
       <ul>
         <li
@@ -312,6 +317,7 @@ import {
   messageU,
   shapes,
 } from '../utils'
+import { nextTick } from 'vue'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
 
@@ -687,13 +693,15 @@ const changeAvatar = (path) => {
 }
 // 词云图
 const container = ref()
-let myChart = ref()
+const myChart = ref()
+const wordcloudData = ref([])
 const shape = ref([
   // 词云图形状
   'icon-yueliang_fill',
   'icon-a-aixin_shixin',
   'icon-bird-xiaoniao',
 ])
+let img = document.createElement('img')
 const currentChoose = ref(2)
 const wordCloudDialogVisible = ref(false)
 const wordcloud = () => {
@@ -720,74 +728,70 @@ const wordcloud = () => {
       })
     }
   })
-  let arr = []
   for (let word in words) {
-    arr.push({
+    wordcloudData.value.push({
       name: word,
       value: words[word],
     })
   }
-  draw(arr)
-}
-const draw = (data) => {
-  const fileReader = new FileReader()
-  console.log(shapes[currentChoose.value])
-  fileReader.readAsDataURL(shapes[currentChoose.value])
-  fileReader.onload = (event) => {
-    console.log(event)
-    try {
-      const { result } = event.target
-    } catch (e) {
-      console.log(e)
-    }
-  }
+  // 我真傻，翻半天网上的内容说要 base64，还用 node去读文件了，结果不行
+  // 哭死，为什么不直接看报错内容支持什么类型（HTMLImageElement）
+  img.src = shapes[currentChoose.value]
   wordCloudDialogVisible.value = true
-
-  nextTick(() => {
-    myChart.value = echarts.init(container.value)
-    myChart.value.setOption({
-      tooltip: {
-        show: false,
-      },
-      series: [
-        {
-          type: 'wordCloud',
-          gridSize: 5,
-          sizeRange: [12, 55],
-          rotationRange: [-45, 0, 45, 90],
-          // maskImage: maskImage,
-          textStyle: {
-            color: function () {
-              let color =
-                'rgb(' +
-                [
-                  Math.round(Math.random() * 250),
-                  Math.round(Math.random() * 250),
-                  Math.round(Math.random() * 250),
-                ].join(',') +
-                ')'
-              return color
-            },
+  // 使用 nextTick 的话有时第一次打开会出现词云图渲染失败的清空，变得一遍空白，奇奇怪怪
+  setTimeout(() => {
+    draw()
+  }, 0)
+}
+const loading = ref(true)
+const draw = () => {
+  myChart.value = echarts.init(container.value)
+  myChart.value.setOption({
+    tooltip: {
+      show: false,
+    },
+    series: [
+      {
+        type: 'wordCloud',
+        gridSize: 5,
+        sizeRange: [12, 55],
+        rotationRange: [-45, 0, 45, 90],
+        maskImage: img,
+        textStyle: {
+          color: function () {
+            let color =
+              'rgb(' +
+              [
+                Math.round(Math.random() * 250),
+                Math.round(Math.random() * 250),
+                Math.round(Math.random() * 250),
+              ].join(',') +
+              ')'
+            return color
           },
-          left: 'center',
-          top: 'center',
-          width: '100%',
-          height: '100%',
-          right: null,
-          bottom: null,
-          layoutAnimation: true,
-          data: data,
         },
-      ],
-    })
+        left: 'center',
+        top: 'center',
+        width: '100%',
+        height: '100%',
+        right: null,
+        bottom: null,
+        layoutAnimation: true,
+        drawOutOfBound: false,
+        data: wordcloudData.value,
+      },
+    ],
   })
+  loading.value = false
+}
+const chooseShape = (index) => {
+  currentChoose.value = index
+  draw()
 }
 const closeWordcloud = () => {
   wordCloudDialogVisible.value = false
   myChart.value.dispose() // 销毁图例
 }
-
-const chooseShape = (index) => {}
 </script>
 
 <style scoped lang="less">

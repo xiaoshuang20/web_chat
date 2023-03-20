@@ -59,6 +59,7 @@
         </el-card>
       </Transition>
     </div>
+    <input type="file" ref="photo" v-show="false" />
   </div>
 </template>
 
@@ -137,6 +138,11 @@ let icons = ref([
     tip: '表情',
   },
   {
+    type: 'photo',
+    icon: 'icon-smile',
+    tip: '图片',
+  },
+  {
     type: 'history',
     icon: 'icon-history',
     tip: '显示消息记录',
@@ -146,6 +152,9 @@ const handleExpand = (data) => {
   switch (data.type) {
     case 'emoji':
       handleEmoji()
+      break
+    case 'photo':
+      handlePhoto()
       break
     case 'history':
       break
@@ -171,6 +180,9 @@ const closeEmojiCard = (e) => {
   isShowEmoji.value = false
   document.removeEventListener('click', closeEmojiCard)
 }
+// 发送图片
+const photo = ref()
+const handlePhoto = () => {}
 // 历史记录（待定）
 </script>
 

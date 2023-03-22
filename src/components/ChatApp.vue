@@ -700,7 +700,7 @@ const shape = ref([
   'icon-a-aixin_shixin',
   'icon-bird-xiaoniao',
 ])
-let img = document.createElement('img')
+let img = ref(new Image())
 const currentChoose = ref(2)
 const wordCloudDialogVisible = ref(false)
 const wordcloud = () => {
@@ -735,60 +735,150 @@ const wordcloud = () => {
   }
   // 我真傻，翻半天网上的内容说要 base64，还用 node去读文件了，结果不行
   // 哭死，为什么不直接看报错内容支持什么类型（HTMLImageElement）
-  img.src = shapes[currentChoose.value]
+  img.value.src = shapes[currentChoose.value]
   wordCloudDialogVisible.value = true
-  // 使用 nextTick 的话有时第一次打开会出现词云图渲染失败的清空，变得一遍空白，奇奇怪怪
-  setTimeout(() => {
+  // 数据量少时效果不明显，所以给一些测试数据
+  // wordcloudData.value = [
+  //   {
+  //     name: '你好',
+  //     value: 12,
+  //   },
+  //   {
+  //     name: '金融',
+  //     value: 8,
+  //   },
+  //   {
+  //     name: '敲代码',
+  //     value: 25,
+  //   },
+  //   {
+  //     name: '我敲',
+  //     value: 19,
+  //   },
+  //   {
+  //     name: '呜呜',
+  //     value: 16,
+  //   },
+  //   {
+  //     name: 'tmd',
+  //     value: 20,
+  //   },
+  //   {
+  //     name: '保险',
+  //     value: 10,
+  //   },
+  //   {
+  //     name: '熬夜',
+  //     value: 18,
+  //   },
+  //   {
+  //     name: '晚安',
+  //     value: 30,
+  //   },
+  //   {
+  //     name: '哈哈哈哈',
+  //     value: 46,
+  //   },
+  //   {
+  //     name: '贷款',
+  //     value: 12,
+  //   },
+  //   {
+  //     name: '法律',
+  //     value: 8,
+  //   },
+  //   {
+  //     name: '服装',
+  //     value: 25,
+  //   },
+  //   {
+  //     name: '帅',
+  //     value: 19,
+  //   },
+  //   {
+  //     name: '羡慕',
+  //     value: 16,
+  //   },
+  //   {
+  //     name: '游戏',
+  //     value: 20,
+  //   },
+  //   {
+  //     name: '上号',
+  //     value: 10,
+  //   },
+  //   {
+  //     name: '咨询',
+  //     value: 18,
+  //   },
+  //   {
+  //     name: '早',
+  //     value: 30,
+  //   },
+  //   {
+  //     name: '啦啦啦',
+  //     value: 46,
+  //   },
+  // ]
+  nextTick(() => {
     draw()
-  }, 0)
-}
-const loading = ref(true)
-const draw = () => {
-  myChart.value = echarts.init(container.value)
-  myChart.value.setOption({
-    tooltip: {
-      show: false,
-    },
-    series: [
-      {
-        type: 'wordCloud',
-        gridSize: 5,
-        sizeRange: [12, 55],
-        rotationRange: [-45, 0, 45, 90],
-        maskImage: img,
-        textStyle: {
-          color: function () {
-            let color =
-              'rgb(' +
-              [
-                Math.round(Math.random() * 250),
-                Math.round(Math.random() * 250),
-                Math.round(Math.random() * 250),
-              ].join(',') +
-              ')'
-            return color
-          },
-        },
-        left: 'center',
-        top: 'center',
-        width: '100%',
-        height: '100%',
-        right: null,
-        bottom: null,
-        layoutAnimation: true,
-        drawOutOfBound: false,
-        data: wordcloudData.value,
-      },
-    ],
   })
-  loading.value = false
+}
+const loading = ref(true) // 加载过程
+const draw = () => {
+  loading.value = true
+  myChart.value = echarts.init(container.value)
+  // 图片加载完成才绘图（细）
+  img.value.onload = () => {
+    myChart.value.setOption({
+      tooltip: {
+        show: false,
+      },
+      series: [
+        {
+          type: 'wordCloud',
+          gridSize: 2,
+          sizeRange: [12, 55],
+          rotationRange: [-20, 20], // 词的倾斜角度
+          maskImage: img.value,
+          textStyle: {
+            color: function () {
+              let color =
+                'rgb(' +
+                [
+                  Math.round(Math.random() * 250),
+                  Math.round(Math.random() * 250),
+                  Math.round(Math.random() * 250),
+                ].join(',') +
+                ')'
+              return color
+            },
+          },
+          left: 'center',
+          top: 'center',
+          width: '70%',
+          height: '100%',
+          right: null,
+          bottom: null,
+          layoutAnimation: true,
+          drawOutOfBound: false,
+          data: wordcloudData.value,
+        },
+      ],
+    })
+    loading.value = false
+  }
 }
 const chooseShape = (index) => {
   currentChoose.value = index
+  // 数据总是少了几个词，不知道为什么 (/_\)
+  img.value.src = shapes[currentChoose.value]
+  myChart.value.dispose() // 销毁图例
   draw()
 }
 const closeWordcloud = () => {
   wordCloudDialogVisible.value = false
+  wordcloudData.value = []
   myChart.value.dispose() // 销毁图例
 }
 </script>

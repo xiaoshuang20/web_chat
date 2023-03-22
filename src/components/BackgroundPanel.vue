@@ -59,7 +59,7 @@
         </el-card>
       </Transition>
     </div>
-    <input type="file" ref="photo" v-show="false" />
+    <input type="file" ref="photo" v-show="false" @change="selectImage" />
   </div>
 </template>
 
@@ -139,7 +139,7 @@ let icons = ref([
   },
   {
     type: 'photo',
-    icon: 'icon-smile',
+    icon: 'icon-img',
     tip: '图片',
   },
   {
@@ -182,7 +182,31 @@ const closeEmojiCard = (e) => {
 }
 // 发送图片
 const photo = ref()
-const handlePhoto = () => {}
+const handlePhoto = () => {
+  photo.value.click()
+}
+// 发送图片
+const selectImage = (e) => {
+  const reg = /\.(?:png|jpg|jepg)$/i
+  let file = e.target.files[0]
+  if (!reg.test(file.name)) {
+    messageU.warn('请选择正确格式的图片文件!')
+    return
+  }
+  let maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    messageU.warn('图片大小不能超过5M!')
+    return
+  }
+
+  // 读 base64 编码
+  let reader = new FileReader()
+  reader.readAsDataURL(file)
+  reader.onloadend = () => {
+    let res = reader.result
+    socket.emit('uploadAvatar', res, currentUser.value)
+  }
+}
 // 历史记录（待定）
 </script>
 

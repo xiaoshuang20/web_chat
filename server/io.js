@@ -47,6 +47,12 @@ io.on('connection', (socket) => {
       io.to(socket.id).emit('addFriendsFail', '不能添加自己为好友哦~')
       return
     }
+    let friends = await api.getAllFriend(user.objectId)
+    if (friends.findIndex((item) => item.name === data) !== -1) {
+      io.to(socket.id).emit('addFriendsFail', '已经是好友了，快去聊天吧~')
+      return
+    }
+
     let res = await api.addFriends(data, user)
     if (!res) {
       io.to(socket.id).emit('addFriendsFail', '搜索用户不存在诶')
@@ -78,6 +84,11 @@ io.on('connection', (socket) => {
     io.to(socket.id).emit('changeAvatar', res)
     socket.broadcast.emit('changeAvatarSuccess', user, res)
     await api.changeAvatar(user.objectId, res)
+  })
+
+  socket.on('uploadImg', async (file, user) => {
+    let res = await api.uploadImg(file)
+    io.to(socket.id).emit('sendImg', res)
   })
 
   // > 消息区域

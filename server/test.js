@@ -29,13 +29,13 @@ Bmob.initialize('bc82f997576ffeca', 'xiao')
 // test(id1, id2)
 // test(id2, id1)
 
-const query = Bmob.Query('user_message')
-query
-  .get('b396db39ce')
-  .then((res) => {
-    res.unset('message')
-    res.save()
-  })
-  .catch((err) => {
-    console.log(err)
-  })
+// const query = Bmob.Query('user_message')
+// query
+//   .get('b396db39ce')
+//   .then((res) => {
+//     res.unset('message')
+//     res.save()
+//   })
+//   .catch((err) => {
+//     console.log(err)
+//   })

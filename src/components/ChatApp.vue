@@ -116,6 +116,7 @@
         :message="message"
         :currentUser="currentUser"
         @sendMessage="sendMessage"
+        @uploadImg="uploadImg"
         ref="panel"
       />
       <div class="emptyUser" v-else>这里还什么也没有哦, 快去跟好友聊天吧！</div>
@@ -338,6 +339,7 @@ const initConnect = async () => {
   socket.on('changeSignatureSuccess', changeSignature)
   socket.on('changeAvatar', changeAvatar)
   socket.on('changeAvatarSuccess', changeAvatarSuccess)
+  socket.on('sendImg', sendImg)
 }
 
 const setRoomId = () => {
@@ -355,15 +357,15 @@ const roomName = computed(() => {
 })
 
 // 获取所有好友
-const allFriends = ref(null) // 所有好友列表（缓存）
+const allFriends = ref(null) // 所有好友列表（缓存，搜索功能必备）
 const friends = ref(null) // 好友列表
 const getAllFriend = () => {
   socket.emit('getAllFriend', currentUser.value)
 }
 const changeFriendsList = (data, msg) => {
   if (data.length !== 0) {
-    allFriends.value = data
-    friends.value = data
+    allFriends.value = [...data]
+    friends.value = [...data]
     // 同时记录历史信息
     data.forEach((item, index) => {
       historyMsg.value[`to_${item.objectId}`] = msg[index]
@@ -383,6 +385,7 @@ const addFriend = () => {
 const addFriendsSuccess = (data, msg) => {
   // 直接将添加的好友 push到好友数组，不需要发起获取好友请求
   if (!friends.value) {
+    // 注意这里不能直接赋值，否则两数据引用同一个对象地址会出问题的
     allFriends.value = [data]
     friends.value = [data]
   } else {
@@ -504,6 +507,30 @@ const sendMessage = (msg) => {
     content: msg,
     currentTime: getCurrentTime(),
     isRead: true,
+    type: 'normal',
+  }
+  addMessage(body)
+  // 保证侧边栏展示的是最后一条历史信息
+  if (historyMsg.value[`to_${targetUser.value.objectId}`]) {
+    historyMsg.value[`to_${targetUser.value.objectId}`].push(body)
+  } else {
+    historyMsg.value[`to_${targetUser.value.objectId}`] = [body]
+  }
+  socket.emit('sendMessage', roomName.value, body)
+}
+// 发送图片
+const uploadImg = (res) => {
+  socket.emit('uploadImg', res, currentUser.value)
+}
+const sendImg = (path) => {
+  let body = {
+    from: currentUser.value,
+    to: targetUser.value,
+    content: '[图片]',
+    currentTime: getCurrentTime(),
+    isRead: true,
+    type: 'img', // 区分图片消息
+    path,
   }
   addMessage(body)
   // 保证侧边栏展示的是最后一条历史信息

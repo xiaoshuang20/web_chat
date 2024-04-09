@@ -1,3 +1,3 @@
 import Bmob from 'hydrogen-js-sdk'
 
-Bmob.initialize('bc82f997576ffeca', 'xiao')
+Bmob.initialize('57444f8d5e554db9', 'xiao')

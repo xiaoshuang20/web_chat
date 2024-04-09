@@ -23,7 +23,8 @@
             c_send: props.isSend,
           }"
         >
-          <ChatContent :msg="props.msg.content" />
+          <img v-if="props.msg.type === 'img'" :src="props.msg.path" alt="" />
+          <ChatContent v-else :msg="props.msg.content" />
         </div>
       </div>
     </div>
@@ -58,14 +59,10 @@ const handleLeave = () => {
   width: 100%;
   margin-top: 14px;
   display: flex;
-  align-items: center;
-
-  .chat-bubble-avatar {
-    padding-left: 10px;
-  }
 
   .chat-bubble-msg {
     position: relative;
+    max-width: 50%;
 
     .chat-bubble-time {
       position: absolute;
@@ -79,13 +76,18 @@ const handleLeave = () => {
     .c_receive {
       box-sizing: border-box;
       position: relative;
-      height: 40px;
+      min-height: 40px;
       padding: 0 12px;
       line-height: 40px;
       margin-left: 12px;
       margin-top: 5px;
       border-radius: 7px;
       background-color: #cedee0;
+
+      img {
+        max-width: 100%;
+        margin-top: 12px;
+      }
 
       &::before {
         content: '';
@@ -105,7 +107,6 @@ const handleLeave = () => {
   width: 100%;
   margin-top: 14px;
   display: flex;
-  align-items: center;
   justify-content: right;
 
   .chat-bubble-avatar {
@@ -114,6 +115,7 @@ const handleLeave = () => {
 
   .chat-bubble-msg {
     position: relative;
+    max-width: 50%;
 
     .chat-bubble-time {
       position: absolute;
@@ -127,7 +129,7 @@ const handleLeave = () => {
     .c_send {
       box-sizing: border-box;
       position: relative;
-      height: 40px;
+      min-height: 40px;
       padding: 0 12px;
       line-height: 40px;
       margin-right: 12px;
@@ -135,6 +137,11 @@ const handleLeave = () => {
       border-radius: 7px;
       color: #f7f9fd;
       background-color: #12b7f5;
+
+      img {
+        max-width: 100%;
+        margin-top: 12px;
+      }
 
       &::before {
         content: '';

@@ -114,7 +114,7 @@ const user = {
 
   // 上传头像
   async uploadAvatar(file) {
-    // 上传到assets会导致资源重新加载
+    // 上传到 assets会导致资源重新加载
     let fileName = Date.now() + '.png'
     let temp = dir.split('\\')
     temp[temp.length - 1] = 'public/static/avatar/'
@@ -135,7 +135,27 @@ const user = {
     let res = await this.getUserMsg(id)
     res.set('avatarUrl', path)
     res.save()
-  }
+  },
+
+  // 发送图片
+  async uploadImg(file) {
+    // 上传到 assets会导致资源重新加载
+    let fileName = Date.now() + '.png'
+    let temp = dir.split('\\')
+    temp[temp.length - 1] = 'public/static/chatImg/'
+    let filePath = temp.join('/') + fileName
+    let base64 = file.replace(/^data:image\/\w+;base64,/, '')
+    let dataBuffer = Buffer.from(base64, 'base64')
+    return new Promise((resolve, reject) => {
+      fs.writeFile(filePath, dataBuffer, function (err) {
+        if (!err) {
+          resolve('/static/chatImg/' + fileName)
+        } else {
+          reject(false)
+        }
+      })
+    })
+  },
 }
 
 const message = {

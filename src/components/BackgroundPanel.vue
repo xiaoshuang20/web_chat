@@ -104,6 +104,7 @@ let timer = null
 const input = ref()
 const window = ref()
 watchEffect(() => {
+  console.log('scroll')
   // 这里只会触发一次（疑惑：props.message变化监听不到？）
   scroll()
   if (props.message && window.value) {
@@ -204,7 +205,7 @@ const selectImage = (e) => {
   reader.readAsDataURL(file)
   reader.onloadend = () => {
     let res = reader.result
-    socket.emit('uploadAvatar', res, currentUser.value)
+    emits('uploadImg', res)
   }
 }
 // 历史记录（待定）
@@ -221,6 +222,7 @@ const selectImage = (e) => {
     width: 100%;
     padding-bottom: 12px;
     padding-right: 10px;
+    padding-left: 10px;
     overflow: hidden;
     background-color: #e6f8fa;
 

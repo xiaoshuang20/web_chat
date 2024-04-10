@@ -22,15 +22,34 @@
           <el-input
             placeholder="搜索"
             v-model="searchKey"
-            @keydown.enter="searchFriend"
+            @input="searchFriend"
+            clearable
           >
             <template #prefix>
               <Epsearch />
             </template>
           </el-input>
-          <el-button type="primary" @click.stop="dialogVisible = true">
-            <EpPlus />
-          </el-button>
+          <el-popover
+            :teleported="false"
+            placement="bottom"
+            :width="200"
+            trigger="click"
+            :hide-after="0"
+          >
+            <template #reference>
+              <el-button type="primary">
+                <EpPlus />
+              </el-button>
+            </template>
+            <div class="add-icon">
+              <el-button @click.stop="dialogVisible = true">
+                <EpCirclePlus class="icon" />添加好友
+              </el-button>
+              <el-button @click.stop="openGroupDialog()">
+                <EpChatLineSquare class="icon" />创建群聊
+              </el-button>
+            </div>
+          </el-popover>
         </div>
         <ul v-if="friends" class="user">
           <li
@@ -124,7 +143,7 @@
     <!-- 个人信息弹框 -->
     <el-dialog
       v-model="settingDialogVisible"
-      width="50%"
+      width="45%"
       :modal="false"
       draggable
       @close-auto-focus="closeSetting"
@@ -196,6 +215,7 @@
       </div>
     </el-dialog>
   </div>
+  <!-- 添加好友弹框 -->
   <el-dialog
     v-model="dialogVisible"
     title="添加好友"
@@ -226,6 +246,100 @@
       </span>
     </template>
   </el-dialog>
+  <!-- 拉群弹框 -->
+  <el-dialog
+    custom-class="group"
+    v-model="groupDialogVisible"
+    width="40%"
+    :modal="false"
+    draggable
+    @close-auto-focus="handleClose"
+    @close="handleClose"
+  >
+    <template #header>
+      <el-input
+        class="group_input"
+        placeholder="搜索"
+        v-model="searchKey"
+        @input="searchFriend"
+        clearable
+      >
+        <template #prefix>
+          <Epsearch />
+        </template>
+      </el-input>
+      <el-divider direction="vertical" />
+      <span class="text">{{
+        groupMember.length === 0
+          ? '请勾选需要添加的联系人'
+          : `已选择了${groupMember.length}个联系人`
+      }}</span>
+    </template>
+    <div class="group_content">
+      <div class="group_all">
+        <div class="container" ref="groupAll">
+          <ul>
+            <li
+              v-for="(friend, index) in allFriends"
+              @click="addMember(friend, index)"
+              :class="{ select: index === clickUser }"
+            >
+              <div class="left">
+                <el-avatar :size="40" :src="friend.avatarUrl" />
+              </div>
+              <div class="center">{{ friend.name }}</div>
+              <div class="right">
+                <input
+                  type="checkbox"
+                  @click.stop="addMember(friend, index)"
+                  :checked="
+                    groupMember.findIndex(
+                      (item) => item.objectId === friend.objectId
+                    ) !== -1
+                  "
+                />
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="group_select">
+        <div class="container" ref="groupSelect">
+          <ul>
+            <li v-for="(member, index) in groupMember">
+              <div class="left">
+                <el-avatar :size="40" :src="member.avatarUrl" />
+              </div>
+              <div class="center">{{ member.name }}</div>
+              <div class="right">
+                <EpCircleCloseFilled
+                  color="#dadada"
+                  class="icon"
+                  @click="removeMember(member)"
+                />
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="footer">
+          <el-button @click="groupDialogVisible = false">取消</el-button>
+          <el-button
+            type="primary"
+            @click="creatGroup"
+            :disabled="groupMember.length === 0"
+            >确定</el-button
+          >
+        </div>
+      </div>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="addFriend"> 添加 </el-button>
+      </span>
+    </template>
+  </el-dialog>
+  <!-- 个人信息编辑框 -->
   <el-dialog
     v-model="editgDialogVisible"
     title="编辑资料"
@@ -277,6 +391,7 @@
       </span>
     </template>
   </el-dialog>
+  <!-- 词云图弹框 -->
   <el-dialog
     class="wordcloud"
     v-model="wordCloudDialogVisible"
@@ -311,6 +426,7 @@ import * as echarts from 'echarts'
 import 'echarts-wordcloud'
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
+import _ from 'lodash'
 import {
   getCurrentTime,
   expressTime,
@@ -416,14 +532,15 @@ const changeCurrent = async (userId) => {
 }
 // 搜索好友
 let searchKey = ref('')
-const searchFriend = () => {
+const searchFriend = _.debounce(() => {
+  console.log('search')
   if (searchKey.value === '') {
     friends.value = [...allFriends.value]
   }
   friends.value = allFriends.value.filter((item) => {
     return item.name.includes(searchKey.value)
   })
-}
+}, 200)
 // 有人改名字了
 const changeName = (id, name) => {
   let index = friends.value.findIndex((item) => item.objectId === id)
@@ -468,6 +585,72 @@ const changeAvatarSuccess = (user, path) => {
     }
   }
 }
+// 拉群功能实现（群聊）
+let groupDialogVisible = ref(false)
+const groupMember = ref([])
+const clickUser = ref()
+const groupAll = ref()
+const groupSelect = ref()
+// 滚动条
+const isScroll = computed(() => (el) => {
+  if (el.scrollHeight > el.clientHeight) {
+    return true
+  } else {
+    return false
+  }
+})
+// 打开弹窗
+const openGroupDialog = () => {
+  groupDialogVisible.value = true
+  nextTick(() => {
+    if (isScroll.value(groupAll.value)) {
+      groupAll.value.setAttribute('_scroll', true)
+    }
+  })
+}
+// 添加群成员
+const addMember = (user, select) => {
+  clickUser.value = select
+  const index = groupMember.value.findIndex(
+    (item) => item.objectId === user.objectId
+  )
+  if (index === -1) {
+    groupMember.value.push(user)
+  } else {
+    groupMember.value.splice(index, 1)
+  }
+
+  nextTick(() => {
+    if (isScroll.value(groupSelect.value)) {
+      groupSelect.value.setAttribute('_scroll', true)
+    }
+  })
+}
+// 删除群成员
+const removeMember = (user) => {
+  const index = groupMember.value.findIndex(
+    (item) => item.objectId === user.objectId
+  )
+  groupMember.value.splice(index, 1)
+  nextTick(() => {
+    if (!isScroll.value(groupSelect.value)) {
+      groupSelect.value.setAttribute('_scroll', false)
+    }
+  })
+}
+// 创建群聊
+const creatGroup = () => {
+  const member = groupMember.value.map((item) => item.objectId)
+  socket.emit('creatGroup', member)
+  groupDialogVisible.value = false
+}
+
+watch(groupDialogVisible, (val) => {
+  // 关闭弹窗时需要清空数据
+  if (!val) {
+    groupMember.value = []
+  }
+})
 
 /**
  * > 消息区域
@@ -996,6 +1179,31 @@ const closeWordcloud = () => {
 
           &:hover {
             background-color: #b0eef7;
+          }
+        }
+
+        :deep(.el-popover) {
+          padding: 5px 0 !important;
+
+          .add-icon {
+            display: flex;
+            flex-direction: column;
+
+            .el-button {
+              width: 100%;
+              margin: 0;
+              background-color: #fdfeff;
+
+              span {
+                .icon {
+                  margin-right: 8px;
+                }
+              }
+
+              &:hover {
+                background-color: #ecedee;
+              }
+            }
           }
         }
       }

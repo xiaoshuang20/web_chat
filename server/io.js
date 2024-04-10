@@ -91,6 +91,8 @@ io.on('connection', (socket) => {
     io.to(socket.id).emit('sendImg', res)
   })
 
+  socket.on('creatGroup', async (users) => {})
+
   // > 消息区域
   socket.on('sendMessage', async (name, data) => {
     // 更新聊天对象信息（对方登录后自带的房间 ID 值会变，需要实时更新）

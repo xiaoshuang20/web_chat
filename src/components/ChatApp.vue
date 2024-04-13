@@ -61,7 +61,11 @@
             >
               <div class="left">
                 <!-- 双击头像查看用户个人信息面板 -->
-                <el-avatar :size="40" :src="member.avatarUrl" />
+                <el-avatar
+                  :size="40"
+                  :src="member.avatarUrl"
+                  @dblclick="dbclickGroup(member)"
+                />
               </div>
               <div class="center">
                 <span>{{ member.name }}</span>
@@ -295,6 +299,35 @@
       </span>
     </template>
   </el-dialog>
+  <!-- 修改群名弹框 -->
+  <el-dialog
+    v-model="groupNameDialogVisible"
+    title="编辑群名"
+    width="30%"
+    :modal="false"
+    draggable
+  >
+    <div
+      :style="{
+        display: 'flex',
+        alignItems: 'center',
+      }"
+    >
+      <span
+        :style="{
+          width: '40px',
+        }"
+        >群名</span
+      >
+      <el-input v-model="groupName" placeholder="请输入群名"></el-input>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="groupNameDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="editGroupName"> 确认 </el-button>
+      </span>
+    </template>
+  </el-dialog>
   <!-- 拉群弹框 -->
   <el-dialog
     custom-class="group"
@@ -302,15 +335,13 @@
     width="40%"
     :modal="false"
     draggable
-    @close-auto-focus="handleClose"
-    @close="handleClose"
   >
     <template #header>
       <el-input
         class="group_input"
         placeholder="搜索"
-        v-model="searchKey"
-        @input="searchFriend"
+        v-model="groupSearchKey"
+        @input="groupSearchFriend"
         clearable
       >
         <template #prefix>
@@ -329,7 +360,7 @@
         <div class="container" ref="groupAll">
           <ul>
             <li
-              v-for="(friend, index) in allFriends"
+              v-for="(friend, index) in allFriendsCopy"
               @click="addMember(friend, index)"
               :class="{ select: index === clickUser }"
             >
@@ -510,6 +541,8 @@ const initConnect = async () => {
   socket.on('createGroupSuccess', createGroupSuccess)
   socket.on('isJoinGroup', isJoinGroup)
   socket.on('joinGroup', joinGroup)
+  socket.on('editGroupNameSuccess', editGroupNameSuccess)
+  socket.on('editGroupNameFail', editGroupNameFail)
 }
 
 const setRoomId = () => {
@@ -590,7 +623,6 @@ const changeCurrent = async (userId) => {
 // 搜索好友
 let searchKey = ref('')
 const searchFriend = _.debounce(() => {
-  console.log('search')
   if (searchKey.value === '') {
     friends.value = [...allFriends.value]
   }
@@ -648,6 +680,7 @@ const groupMember = ref([])
 const clickUser = ref()
 const groupAll = ref()
 const groupSelect = ref()
+const allFriendsCopy = ref([])
 // 滚动条
 const isScroll = computed(() => (el) => {
   if (el.scrollHeight > el.clientHeight) {
@@ -659,6 +692,7 @@ const isScroll = computed(() => (el) => {
 // 打开弹窗
 const openGroupDialog = () => {
   groupDialogVisible.value = true
+  allFriendsCopy.value = _.cloneDeep(allFriends.value)
   nextTick(() => {
     if (isScroll.value(groupAll.value)) {
       groupAll.value.setAttribute('_scroll', true)
@@ -695,6 +729,16 @@ const removeMember = (user) => {
     }
   })
 }
+// 搜索群成员
+let groupSearchKey = ref('')
+const groupSearchFriend = _.debounce(() => {
+  if (groupSearchKey.value === '') {
+    allFriendsCopy.value = [...allFriends.value]
+  }
+  allFriendsCopy.value = allFriends.value.filter((item) => {
+    return item.name.includes(groupSearchKey.value)
+  })
+}, 200)
 // 创建群聊
 const creatGroup = () => {
   const member = groupMember.value.map((item) => item.objectId)
@@ -713,12 +757,30 @@ const isJoinGroup = (groupId) => {
 const targetGroup = ref(null)
 const allGroup = ref([])
 const group = ref([])
+let groupNameDialogVisible = ref(false)
+const groupName = ref('')
 // 更新群聊数据
 const changeGroupsList = (groups) => {
   if (groups && group.length !== 0) {
     allGroup.value = [...groups]
     group.value = [...groups]
   }
+}
+// 群聊名称弹窗
+const dbclickGroup = (group) => {
+  groupName.value = group.name
+  groupNameDialogVisible.value = true
+}
+const editGroupName = () => {
+  groupNameDialogVisible = false
+  socket.emit('editGroupName', groupName.value, targetGroup.value.objectId)
+}
+const editGroupNameSuccess = (msg) => {
+  targetGroup.value.name = groupName.value
+  messageU.success(msg)
+}
+const editGroupNameFail = (msg) => {
+  messageU.error(msg)
 }
 // 切换群聊
 const changeGroup = async (groupId) => {
@@ -864,8 +926,6 @@ const getMessage = (msg) => {
   }
 }
 const getGroupMessage = (msg, groupId) => {
-  console.log('xiao', msg)
-
   // if (msg.from.objectId !== targetUser.value?.objectId) {
   //   msg.isRead = false
   //   socket.emit('changeReadStatus', msg)

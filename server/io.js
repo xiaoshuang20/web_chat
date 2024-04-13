@@ -29,7 +29,6 @@ io.on('connection', (socket) => {
       let joinGroup = await api.getAllGroup(res.objectId)
       joinGroup.forEach((item) => {
         socket.join(item.objectId)
-        console.log(res.objectId, '加入：', item.objectId)
       })
       io.to(socket.id).emit('loginSuccess', res)
     }
@@ -116,7 +115,6 @@ io.on('connection', (socket) => {
     let joinGroup = await api.getAllGroup(user.objectId)
     joinGroup.forEach((item) => {
       socket.join(item.objectId)
-      console.log(user.objectId, '加入：', item.objectId)
     })
   })
 
@@ -131,6 +129,15 @@ io.on('connection', (socket) => {
       io.to(socket.id).emit('joinGroup', group)
     } else {
       console.log('不加入')
+    }
+  })
+
+  socket.on('editGroupName', async (name, groupId) => {
+    let res = await api.editGroupName(name, groupId)
+    if (res) {
+      io.to(socket.id).emit('editGroupNameSuccess', '修改成功')
+    } else {
+      io.to(socket.id).emit('editGroupNameFail', '啊哦，好像出问题了')
     }
   })
 

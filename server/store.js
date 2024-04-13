@@ -161,6 +161,15 @@ const user = {
     return false
   },
 
+  // 改群名
+  async editGroupName(name, groupId) {
+    const queryUsers = Bmob.Query('group_message')
+    let res = await queryUsers.get(groupId)
+    res.set('name', name)
+    res.save()
+    return true
+  },
+
   // 上传头像
   async uploadAvatar(file) {
     // 上传到 assets会导致资源重新加载

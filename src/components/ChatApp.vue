@@ -11,7 +11,7 @@
         <li class="full">
           <EpFullScreen />
         </li>
-        <li class="close">
+        <li class="close" @click="loginout">
           <EpClose />
         </li>
       </ul>
@@ -507,6 +507,7 @@ import 'echarts-wordcloud'
 import BackgroundPanel from './BackgroundPanel.vue'
 import { io } from 'socket.io-client'
 import _ from 'lodash'
+import { useRouter } from 'vue-router'
 import {
   getCurrentTime,
   expressTime,
@@ -516,6 +517,7 @@ import {
 } from '../utils'
 
 const socket = io() // 因为在 vite.config.js 文件中配置了代理，所以可以视为同域
+const router = useRouter()
 
 onMounted(() => {
   initConnect()
@@ -543,6 +545,13 @@ const initConnect = async () => {
   socket.on('joinGroup', joinGroup)
   socket.on('editGroupNameSuccess', editGroupNameSuccess)
   socket.on('editGroupNameFail', editGroupNameFail)
+}
+
+// 登出
+const loginout = () => {
+  window.sessionStorage.removeItem('current_user')
+  messageU.warn('已登出~')
+  router.push('/login')
 }
 
 const setRoomId = () => {

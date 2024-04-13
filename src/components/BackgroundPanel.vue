@@ -104,7 +104,6 @@ let timer = null
 const input = ref()
 const window = ref()
 watchEffect(() => {
-  console.log('scroll')
   // 这里只会触发一次（疑惑：props.message变化监听不到？）
   scroll()
   if (props.message && window.value) {

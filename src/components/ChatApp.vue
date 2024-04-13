@@ -51,61 +51,110 @@
             </div>
           </el-popover>
         </div>
-        <ul v-if="friends" class="user">
-          <li
-            v-for="user in friends"
-            :key="user.objectId"
-            @click="changeCurrent(user.objectId)"
-            :class="{ active: current === user.objectId }"
-          >
-            <div class="left">
-              <!-- 双击头像查看用户个人信息面板 -->
-              <el-avatar
-                :size="40"
-                :src="user.avatarUrl"
-                @dblclick="dbclickUser(user)"
-              />
-            </div>
-            <div class="center">
-              <span>{{ user.name }}</span>
-              <p>
-                {{
-                  historyMsg[`to_${user.objectId}`]
-                    ? historyMsg[`to_${user.objectId}`][
-                        historyMsg[`to_${user.objectId}`].length - 1
-                      ].content
-                    : '已添加好友'
-                }}
-              </p>
-            </div>
-            <div class="right">
-              <span>{{
-                historyMsg[`to_${user.objectId}`]
-                  ? expressTime(
-                      historyMsg[`to_${user.objectId}`][
-                        historyMsg[`to_${user.objectId}`].length - 1
-                      ].currentTime
-                    )
-                  : expressTime(user.updatedAt)
-              }}</span>
-              <div class="msg_unread_box">
-                <div
-                  v-show="unreadNum(user.objectId) !== -1"
-                  :class="{ much_msg: unreadNum(user.objectId) > 99 }"
-                >
-                  <p>
-                    {{
-                      unreadNum(user.objectId) > 99
-                        ? 99
-                        : unreadNum(user.objectId)
-                    }}
-                  </p>
-                  <span v-if="unreadNum(user.objectId) > 99">+</span>
+        <div v-if="friends || group" class="list">
+          <ul v-if="group" class="group">
+            <li
+              v-for="member in group"
+              :key="member.objectId"
+              @click="changeGroup(member.objectId)"
+              :class="{ active: current === member.objectId }"
+            >
+              <div class="left">
+                <!-- 双击头像查看用户个人信息面板 -->
+                <el-avatar :size="40" :src="member.avatarUrl" />
+              </div>
+              <div class="center">
+                <span>{{ member.name }}</span>
+                <p>
+                  {{
+                    member.message?.length > 0
+                      ? member.message[member.message.length - 1].content
+                      : '一起聊天吧~'
+                  }}
+                </p>
+              </div>
+              <div class="right">
+                <span>{{
+                  member.message?.length > 0
+                    ? expressTime(
+                        member.message[member.message.length - 1].currentTime
+                      )
+                    : expressTime(member.updatedAt)
+                }}</span>
+                <div class="msg_unread_box">
+                  <!-- <div
+                    v-show="unreadNum(user.objectId) !== -1"
+                    :class="{ much_msg: unreadNum(user.objectId) > 99 }"
+                  >
+                    <p>
+                      {{
+                        unreadNum(user.objectId) > 99
+                          ? 99
+                          : unreadNum(user.objectId)
+                      }}
+                    </p>
+                    <span v-if="unreadNum(user.objectId) > 99">+</span>
+                  </div> -->
                 </div>
               </div>
-            </div>
-          </li>
-        </ul>
+            </li>
+          </ul>
+          <ul v-if="friends" class="user">
+            <li
+              v-for="user in friends"
+              :key="user.objectId"
+              @click="changeCurrent(user.objectId)"
+              :class="{ active: current === user.objectId }"
+            >
+              <div class="left">
+                <!-- 双击头像查看用户个人信息面板 -->
+                <el-avatar
+                  :size="40"
+                  :src="user.avatarUrl"
+                  @dblclick="dbclickUser(user)"
+                />
+              </div>
+              <div class="center">
+                <span>{{ user.name }}</span>
+                <p>
+                  {{
+                    historyMsg[`to_${user.objectId}`]
+                      ? historyMsg[`to_${user.objectId}`][
+                          historyMsg[`to_${user.objectId}`].length - 1
+                        ].content
+                      : '已添加好友'
+                  }}
+                </p>
+              </div>
+              <div class="right">
+                <span>{{
+                  historyMsg[`to_${user.objectId}`]
+                    ? expressTime(
+                        historyMsg[`to_${user.objectId}`][
+                          historyMsg[`to_${user.objectId}`].length - 1
+                        ].currentTime
+                      )
+                    : expressTime(user.updatedAt)
+                }}</span>
+                <div class="msg_unread_box">
+                  <div
+                    v-show="unreadNum(user.objectId) !== -1"
+                    :class="{ much_msg: unreadNum(user.objectId) > 99 }"
+                  >
+                    <p>
+                      {{
+                        unreadNum(user.objectId) > 99
+                          ? 99
+                          : unreadNum(user.objectId)
+                      }}
+                    </p>
+                    <span v-if="unreadNum(user.objectId) > 99">+</span>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
         <p v-else class="no_friends">还没有好友哦!</p>
         <div class="footer">
           <!-- 进阶功能（我的/好友请求/气泡样式/创建房间） -->
@@ -131,7 +180,7 @@
         </div>
       </div>
       <BackgroundPanel
-        v-if="targetUser"
+        v-if="targetUser || targetGroup"
         :message="message"
         :currentUser="currentUser"
         @sendMessage="sendMessage"
@@ -447,15 +496,20 @@ const initConnect = async () => {
   getAllFriend()
   setRoomId()
   socket.on('getAllFriendSuccess', changeFriendsList)
+  socket.on('getAllGroupSuccess', changeGroupsList)
   socket.on('addFriendsSuccess', addFriendsSuccess)
   socket.on('addFriendsFail', addFriendsFail)
   socket.on('sendMessageFail', sendMessageFail)
   socket.on('getMessage', getMessage)
+  socket.on('getGroupMessage', getGroupMessage)
   socket.on('changeNameSuccess', changeName)
   socket.on('changeSignatureSuccess', changeSignature)
   socket.on('changeAvatar', changeAvatar)
   socket.on('changeAvatarSuccess', changeAvatarSuccess)
   socket.on('sendImg', sendImg)
+  socket.on('createGroupSuccess', createGroupSuccess)
+  socket.on('isJoinGroup', isJoinGroup)
+  socket.on('joinGroup', joinGroup)
 }
 
 const setRoomId = () => {
@@ -477,6 +531,8 @@ const allFriends = ref(null) // 所有好友列表（缓存，搜索功能必备
 const friends = ref(null) // 好友列表
 const getAllFriend = () => {
   socket.emit('getAllFriend', currentUser.value)
+  socket.emit('getAllGroup', currentUser.value)
+  socket.emit('initJoinGroup', currentUser.value)
 }
 const changeFriendsList = (data, msg) => {
   if (data.length !== 0) {
@@ -524,6 +580,7 @@ let current = ref() // 当前选中用户
 const changeCurrent = async (userId) => {
   if (current.value === userId) return
   current.value = userId
+  targetGroup.value = null
   targetUser.value = friends.value.find((item) => item.objectId === userId)
   message.value = historyMsg.value[`to_${userId}`]
     ? [...historyMsg.value[`to_${userId}`]]
@@ -641,8 +698,42 @@ const removeMember = (user) => {
 // 创建群聊
 const creatGroup = () => {
   const member = groupMember.value.map((item) => item.objectId)
-  socket.emit('creatGroup', member)
+  // 别忘了自己也会加群
+  socket.emit('creatGroup', [...member, currentUser.value.objectId])
   groupDialogVisible.value = false
+}
+// 创建群聊成功
+const createGroupSuccess = (msg) => {
+  messageU.success(msg)
+}
+// 是否加入新群聊
+const isJoinGroup = (groupId) => {
+  socket.emit('joinGroup', groupId, currentUser.value.objectId)
+}
+const targetGroup = ref(null)
+const allGroup = ref([])
+const group = ref([])
+// 更新群聊数据
+const changeGroupsList = (groups) => {
+  if (groups && group.length !== 0) {
+    allGroup.value = [...groups]
+    group.value = [...groups]
+  }
+}
+// 切换群聊
+const changeGroup = async (groupId) => {
+  if (current.value === groupId) return
+  current.value = groupId
+  const temp = group.value.find((item) => item.objectId === groupId)
+  targetGroup.value = temp
+  targetUser.value = null
+  message.value = temp.message ? [...temp.message] : []
+  // clearUnread(userId) 暂定
+}
+// 加入群聊
+const joinGroup = (newJoin) => {
+  allGroup.value.push(newJoin)
+  group.value.push(newJoin)
 }
 
 watch(groupDialogVisible, (val) => {
@@ -683,23 +774,41 @@ const clearUnread = (id) => {
 }
 // 发送信息
 const sendMessage = (msg) => {
-  // 发信息前对面的老6刷新了怎么办(已解决)
-  let body = {
-    from: currentUser.value,
-    to: targetUser.value,
-    content: msg,
-    currentTime: getCurrentTime(),
-    isRead: true,
-    type: 'normal',
+  if (targetUser.value) {
+    // 发信息前对面的老6刷新了怎么办(已解决)
+    let body = {
+      from: currentUser.value,
+      to: targetUser.value,
+      content: msg,
+      currentTime: getCurrentTime(),
+      isRead: true,
+      type: 'normal',
+    }
+    addMessage(body)
+    // 保证侧边栏展示的是最后一条历史信息
+    if (historyMsg.value[`to_${targetUser.value.objectId}`]) {
+      historyMsg.value[`to_${targetUser.value.objectId}`].push(body)
+    } else {
+      historyMsg.value[`to_${targetUser.value.objectId}`] = [body]
+    }
+    socket.emit('sendMessage', roomName.value, body)
+  } else if (targetGroup.value) {
+    let body = {
+      from: currentUser.value,
+      to: targetGroup.value.objectId,
+      content: msg,
+      currentTime: getCurrentTime(),
+      type: 'normal',
+    }
+    addMessage(body)
+    // 保证侧边栏展示的是最后一条历史信息
+    if (targetGroup.value.message) {
+      targetGroup.value.message.push(body)
+    } else {
+      targetGroup.value.message = [body]
+    }
+    socket.emit('sendGroupMessage', targetGroup.value.objectId, body)
   }
-  addMessage(body)
-  // 保证侧边栏展示的是最后一条历史信息
-  if (historyMsg.value[`to_${targetUser.value.objectId}`]) {
-    historyMsg.value[`to_${targetUser.value.objectId}`].push(body)
-  } else {
-    historyMsg.value[`to_${targetUser.value.objectId}`] = [body]
-  }
-  socket.emit('sendMessage', roomName.value, body)
 }
 // 发送图片
 const uploadImg = (res) => {
@@ -730,7 +839,8 @@ const addMessage = (msg) => {
   // 不能影响当前对话框
   if (
     msg.from.objectId === targetUser.value?.objectId ||
-    msg.from.objectId === currentUser.value.objectId
+    msg.from.objectId === currentUser.value.objectId ||
+    msg.to === targetGroup.value?.objectId
   ) {
     message.value.push(msg)
     panel.value.scroll() //最新消息自动滚动到底部
@@ -751,6 +861,22 @@ const getMessage = (msg) => {
     historyMsg.value[`to_${msg.from.objectId}`].push(msg)
   } else {
     historyMsg.value[`to_${msg.from.objectId}`] = [msg]
+  }
+}
+const getGroupMessage = (msg, groupId) => {
+  console.log('xiao', msg)
+
+  // if (msg.from.objectId !== targetUser.value?.objectId) {
+  //   msg.isRead = false
+  //   socket.emit('changeReadStatus', msg)
+  // }
+  addMessage(msg)
+  const temp = allGroup.value.find((item) => item.objectId === groupId)
+  // 保证侧边栏展示的是最后一条历史信息
+  if (temp.message) {
+    temp.message.push(msg)
+  } else {
+    temp.message = [msg]
   }
 }
 
@@ -1208,113 +1334,125 @@ const closeWordcloud = () => {
         }
       }
 
-      .user {
+      .list {
         display: flex;
         flex-direction: column;
-        margin-right: 1px;
-        height: 80%;
-        width: 100%;
-        overflow-y: scroll;
+        justify-content: center;
 
         &::-webkit-scrollbar {
           width: 0;
         }
 
-        li {
-          box-sizing: border-box;
-          min-height: 60px;
-          width: 100%;
+        .user,
+        .group {
           display: flex;
-          border-left: 3px solid #e6f8fa;
+          flex-direction: column;
+          margin-right: 1px;
+          height: 80%;
+          width: 100%;
+          overflow-y: scroll;
 
-          .left {
-            flex: 1;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          }
-
-          .center {
-            flex: 2;
-            height: 100%;
+          &::-webkit-scrollbar {
             width: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            overflow: hidden;
-
-            span,
-            p {
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            }
-
-            p {
-              font-size: 12px;
-              color: #6d7576;
-            }
           }
 
-          .right {
-            flex: 1;
-            height: 100%;
+          li {
+            box-sizing: border-box;
+            min-height: 60px;
+            width: 100%;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
+            border-left: 3px solid #e6f8fa;
 
-            span {
-              font-size: 12px;
-              color: #6d7576;
+            .left {
+              flex: 1;
+              height: 100%;
+              display: flex;
+              justify-content: center;
+              align-items: center;
             }
 
-            .msg_unread_box {
-              width: 20px;
-              height: 20px;
+            .center {
+              flex: 2;
+              height: 100%;
+              width: 0;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              overflow: hidden;
 
-              div {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                margin-top: 5px;
-                width: 100%;
-                height: 100%;
-                border-radius: 50%;
-                background-color: #fe5438;
+              span,
+              p {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
               }
 
               p {
-                color: white;
                 font-size: 12px;
+                color: #6d7576;
               }
+            }
+
+            .right {
+              flex: 1;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
 
               span {
-                color: #fff;
-                margin-bottom: 3px;
+                font-size: 12px;
+                color: #6d7576;
+              }
+
+              .msg_unread_box {
+                width: 20px;
+                height: 20px;
+
+                div {
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  margin-top: 5px;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 50%;
+                  background-color: #fe5438;
+                }
+
+                p {
+                  color: white;
+                  font-size: 12px;
+                }
+
+                span {
+                  color: #fff;
+                  margin-bottom: 3px;
+                }
+              }
+
+              // 消息数超过两位数时变宽度
+              .much_msg {
+                width: 28px !important;
+                border-top-left-radius: 10px !important;
+                border-top-right-radius: 10px !important;
+                border-bottom-left-radius: 10px !important;
+                border-bottom-right-radius: 10px !important;
               }
             }
 
-            // 消息数超过两位数时变宽度
-            .much_msg {
-              width: 28px !important;
-              border-top-left-radius: 10px !important;
-              border-top-right-radius: 10px !important;
-              border-bottom-left-radius: 10px !important;
-              border-bottom-right-radius: 10px !important;
+            &:hover {
+              cursor: pointer;
+              background-color: #daebed;
             }
           }
 
-          &:hover {
-            cursor: pointer;
-            background-color: #daebed;
+          .active {
+            background-color: #d4e4e6;
+            border-left: 3px solid #00b6cc;
           }
-        }
-
-        .active {
-          background-color: #d4e4e6;
-          border-left: 3px solid #00b6cc;
         }
       }
 

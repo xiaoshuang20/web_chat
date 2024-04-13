@@ -54,6 +54,15 @@ const user = {
     return res.results
   },
 
+  // 获取所有加入的群聊
+  async getAllGroup(id) {
+    const queryUsers = Bmob.Query('users')
+    // 筛选条件
+    queryUsers.field('group', id)
+    let res = await queryUsers.relation('group_message')
+    return res.results
+  },
+
   // 添加好友
   async addFriends(name, user) {
     const queryUsers = Bmob.Query('users')
@@ -110,6 +119,46 @@ const user = {
     let res = await this.getUserMsg(id)
     res.set('name', data)
     res.save()
+  },
+
+  // 创建群聊
+  async createGroup(users) {
+    const queryGroupMessage = Bmob.Query('group_message')
+    const roomName = users.join(',')
+    queryGroupMessage.set('users', roomName)
+    let res = await queryGroupMessage.save()
+
+    if (res.objectId) {
+      const groupName = await this.addGroup(users, res.objectId)
+      const temp = await queryGroupMessage.get(res.objectId)
+      temp.set('name', groupName)
+      temp.save()
+      return res.objectId
+    }
+  },
+
+  // 用户记录加入的群聊
+  async addGroup(users, groupId) {
+    const groupName = []
+    const relation = Bmob.Relation('group_message')
+    const relID = relation.add(groupId)
+    const queryUsers = Bmob.Query('users')
+    for (let i = 0; i < users.length; i++) {
+      let res = await queryUsers.get(users[i])
+      res.set('group', relID)
+      groupName.push(res.name)
+      res.save()
+      if (groupName.length === users.length) return groupName.join(',')
+    }
+  },
+
+  // 是否加入新群聊
+  async joinGroup(groupId, userId) {
+    let res = await this.getAllGroup(userId)
+    if (res.findIndex((item) => item.objectId === groupId) !== -1) {
+      return true
+    }
+    return false
   },
 
   // 上传头像
@@ -188,6 +237,15 @@ const message = {
     let res1 = await queryUsersMessage.get(res[0].objectId)
     res1.add('message', [msg])
     res1.save()
+    return true
+  },
+
+  // 发送群聊消息
+  async saveGroupMessage(group, msg) {
+    const queryGroupMessage = Bmob.Query('group_message')
+    let res = await queryGroupMessage.get(group)
+    res.add('message', [msg])
+    res.save()
     return true
   },
 
